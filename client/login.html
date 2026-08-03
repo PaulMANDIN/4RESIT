@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SUPMEAL</title>
+  <title>Connexion — SUPMEAL</title>
   <link rel="stylesheet" href="/css/main.css" />
 </head>
 <body>
@@ -20,9 +20,26 @@
   </header>
 
   <main class="container">
-    <section class="hero">
-      <h1>SUPMEAL</h1>
-      <p>Application de gestion de recettes et planification de repas.</p>
+    <section class="auth-card">
+      <h1>Connexion</h1>
+
+      <p id="form-error" class="form-error" hidden></p>
+
+      <form id="login-form" class="auth-form">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required autocomplete="email" />
+
+        <label for="password">Mot de passe</label>
+        <input type="password" id="password" name="password" required autocomplete="current-password" />
+
+        <button type="submit" class="btn btn--primary">Se connecter</button>
+      </form>
+
+      <div class="auth-divider"><span>ou</span></div>
+
+      <button id="google-login" type="button" class="btn btn--google">Continuer avec Google</button>
+
+      <p class="auth-switch">Pas encore de compte ? <a href="/register.html">S'inscrire</a></p>
     </section>
   </main>
 
@@ -33,6 +50,7 @@
   </footer>
 
   <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
   <script src="/js/app.js"></script>
 </body>
 </html>
