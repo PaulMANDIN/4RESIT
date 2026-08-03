@@ -1,4 +1,4 @@
-const { body, validationResult } = require('express-validator');
+const { body } = require('express-validator');
 
 const validateRegister = [
   body('name')
@@ -25,12 +25,4 @@ const validateLogin = [
     .notEmpty().withMessage('Le mot de passe est obligatoire.'),
 ];
 
-function handleValidationErrors(req, res, next) {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ message: errors.array()[0].msg });
-  }
-  next();
-}
-
-module.exports = { validateRegister, validateLogin, handleValidationErrors };
+module.exports = { validateRegister, validateLogin };
