@@ -76,6 +76,9 @@ const validateRecipeUpdate = [
   body('imageUrl')
     .optional({ checkFalsy: true })
     .isLength({ max: 255 }).withMessage("L'URL de l'image ne peut pas dépasser 255 caractères."),
+  body('cookbookId')
+    .optional({ checkFalsy: true })
+    .isUUID().withMessage('ID de cookbook invalide.'),
   body('ingredients')
     .optional()
     .isArray().withMessage('Les ingrédients doivent être un tableau.'),

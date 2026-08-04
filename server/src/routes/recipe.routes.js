@@ -1,7 +1,11 @@
 const { Router } = require('express');
 const recipeController = require('../controllers/recipe.controller');
 const { requireAuth } = require('../middleware/auth');
-const { requireRecipeAccess, requireCookbookEditorForCreate } = require('../middleware/recipe');
+const {
+  requireRecipeAccess,
+  requireCookbookEditorForCreate,
+  requireRecipeCookbookChangeAllowed,
+} = require('../middleware/recipe');
 const {
   validateRecipeCreate,
   validateRecipeUpdate,
@@ -37,6 +41,7 @@ router.put(
   validateRecipeUpdate,
   handleValidationErrors,
   requireRecipeAccess('EDITOR'),
+  requireRecipeCookbookChangeAllowed,
   recipeController.update
 );
 

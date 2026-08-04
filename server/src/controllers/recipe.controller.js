@@ -47,6 +47,9 @@ async function update(req, res) {
     fields.forEach((field) => {
       if (req.body[field] !== undefined) data[field] = req.body[field];
     });
+    if (req.body.cookbookId !== undefined) {
+      data.cookbookId = req.body.cookbookId || null;
+    }
 
     const recipe = await recipeServices.updateRecipe(req.params.id, data, {
       ingredients: req.body.ingredients,

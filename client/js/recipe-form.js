@@ -57,7 +57,7 @@ function collectTags() {
     .filter(Boolean);
 }
 
-async function loadCookbookOptions(selectedId, disabled) {
+async function loadCookbookOptions(selectedId) {
   const select = document.getElementById('cookbookId');
   try {
     const { cookbooks } = await apiFetch('/cookbooks');
@@ -71,7 +71,6 @@ async function loadCookbookOptions(selectedId, disabled) {
   } catch (err) {
     showPageError(err.message);
   }
-  select.disabled = Boolean(disabled);
 }
 
 function fillForm(recipe) {
@@ -109,7 +108,7 @@ async function initForm() {
     }
   }
 
-  await loadCookbookOptions(isEdit ? existingRecipe.cookbookId : cookbookIdParam, isEdit);
+  await loadCookbookOptions(isEdit ? existingRecipe.cookbookId : cookbookIdParam);
 
   if (!isEdit) {
     addIngredientRow();
@@ -135,9 +134,11 @@ async function initForm() {
       tags: collectTags(),
     };
 
+    const selectedCookbookId = document.getElementById('cookbookId').value || null;
     if (!isEdit) {
-      const cookbookId = document.getElementById('cookbookId').value;
-      if (cookbookId) payload.cookbookId = cookbookId;
+      if (selectedCookbookId) payload.cookbookId = selectedCookbookId;
+    } else if (selectedCookbookId !== (existingRecipe.cookbookId || null)) {
+      payload.cookbookId = selectedCookbookId;
     }
 
     try {

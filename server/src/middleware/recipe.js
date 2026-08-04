@@ -48,4 +48,31 @@ async function requireCookbookEditorForCreate(req, res, next) {
   }
 }
 
-module.exports = { requireRecipeAccess, requireCookbookEditorForCreate };
+async function requireRecipeCookbookChangeAllowed(req, res, next) {
+  if (req.body.cookbookId === undefined) return next();
+
+  try {
+    if (req.recipe.createdById !== req.user.userId) {
+      return res.status(403).json({ message: "Seul l'auteur de la recette peut la rattacher ou la détacher d'un cookbook." });
+    }
+
+    const newCookbookId = req.body.cookbookId || null;
+
+    if (req.recipe.cookbookId && newCookbookId && newCookbookId !== req.recipe.cookbookId) {
+      return res.status(400).json({ message: "Impossible de déplacer directement une recette d'un cookbook à un autre." });
+    }
+
+    if (newCookbookId) {
+      const membership = await cookbookServices.getMembership(newCookbookId, req.user.userId);
+      if (!membership || ROLE_RANK[membership.role] < ROLE_RANK.EDITOR) {
+        return res.status(403).json({ message: 'Rôle insuffisant dans le cookbook cible.' });
+      }
+    }
+
+    next();
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+}
+
+module.exports = { requireRecipeAccess, requireCookbookEditorForCreate, requireRecipeCookbookChangeAllowed };
