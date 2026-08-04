@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cookbook — SUPMEAL</title>
+  <link rel="stylesheet" href="/css/main.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="brand" href="/index.html">SUPMEAL</a>
+      <nav class="nav">
+        <a href="/index.html">Accueil</a>
+        <a href="/login.html">Connexion</a>
+        <a href="/register.html">Inscription</a>
+      </nav>
+      <span id="api-status" class="status-badge status-badge--loading">API : vérification…</span>
+    </div>
+  </header>
+
+  <main class="container">
+    <p id="page-error" class="alert alert--error" hidden></p>
+
+    <div id="cookbook-detail"></div>
+
+    <section class="section">
+      <h2>Membres</h2>
+      <ul id="member-list" class="member-list"></ul>
+      <form id="add-member-form" class="inline-form">
+        <input type="email" id="member-email" placeholder="Email du membre" required />
+        <select id="member-role">
+          <option value="READER">Lecteur</option>
+          <option value="COMMENTER">Commentateur</option>
+          <option value="EDITOR">Éditeur</option>
+        </select>
+        <button type="submit" class="btn btn--secondary">Ajouter</button>
+      </form>
+    </section>
+
+    <section class="section">
+      <div class="page-header">
+        <h2>Recettes</h2>
+        <a id="new-recipe-link" href="#" class="btn btn--primary btn--small">Nouvelle recette</a>
+      </div>
+      <div id="cookbook-recipes" class="card-list"></div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>SUPMEAL &mdash; Projet SUPINFO M1</p>
+    </div>
+  </footer>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/app.js"></script>
+  <script src="/js/cookbook.js"></script>
+</body>
+</html>

@@ -22,7 +22,9 @@ function renderAuthNav() {
 
   nav.innerHTML = `
     <a href="/index.html">Accueil</a>
-    <span class="nav-user">${user.name}</span>
+    <a href="/cookbooks.html">Cookbooks</a>
+    <a href="/recipes.html">Recettes</a>
+    <span class="nav-user">${escapeHtml(user.name)}</span>
     <a href="#" id="logout-link">Déconnexion</a>
   `;
 

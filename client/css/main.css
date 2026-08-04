@@ -220,3 +220,350 @@ main.container {
   font-size: 0.85rem;
   margin-bottom: 1rem;
 }
+
+/* Page layout */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.page-header h1,
+.page-header h2 {
+  margin: 0;
+}
+
+.section {
+  margin-top: 2.5rem;
+}
+
+.section h2 {
+  font-size: 1.15rem;
+  margin-bottom: 0.75rem;
+}
+
+.empty-state {
+  color: var(--color-muted);
+  font-size: 0.95rem;
+  padding: 1.5rem 0;
+}
+
+/* Alerts */
+.alert {
+  border-radius: var(--radius);
+  padding: 0.6rem 0.8rem;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.alert--error {
+  background: color-mix(in srgb, var(--color-error) 10%, transparent);
+  border: 1px solid var(--color-error);
+  color: var(--color-error);
+}
+
+/* Cards */
+.card-list {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+
+.card {
+  display: block;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 1.2rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.card:hover {
+  border-color: var(--color-primary);
+}
+
+.card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.card__header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.card__desc {
+  color: var(--color-muted);
+  font-size: 0.9rem;
+  margin: 0.5rem 0 0;
+}
+
+.card__meta {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+/* Badges */
+.badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+
+.badge--role-creator { color: var(--color-primary-dark); border-color: var(--color-primary); }
+.badge--role-editor { color: var(--color-success); border-color: var(--color-success); }
+
+.tag-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+
+/* Buttons */
+.btn--secondary {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+
+.btn--secondary:hover {
+  border-color: var(--color-primary);
+}
+
+.btn--danger {
+  background: var(--color-surface);
+  color: var(--color-error);
+  border: 1px solid var(--color-error);
+}
+
+.btn--danger:hover {
+  background: var(--color-error);
+  color: #fff;
+}
+
+.btn--small {
+  padding: 0.4rem 0.75rem;
+  font-size: 0.85rem;
+}
+
+a.btn {
+  display: inline-block;
+  text-decoration: none;
+}
+
+/* Generic forms */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  max-width: 640px;
+}
+
+.form label {
+  font-size: 0.85rem;
+  color: var(--color-muted);
+  margin-top: 0.6rem;
+}
+
+.form input,
+.form textarea,
+.form select {
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+  font-family: var(--font);
+}
+
+.form textarea {
+  resize: vertical;
+  min-height: 5rem;
+}
+
+.form-row {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.form-row > div {
+  flex: 1;
+}
+
+.form-actions {
+  margin-top: 1.2rem;
+  display: flex;
+  gap: 0.75rem;
+}
+
+.inline-form {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.inline-form input,
+.inline-form select {
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  font-family: var(--font);
+}
+
+/* Dynamic rows (ingredients / steps) */
+.dynamic-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.dynamic-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.dynamic-row input {
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  font-family: var(--font);
+}
+
+.dynamic-row .ingredient-name { flex: 3; }
+.dynamic-row .ingredient-qty { flex: 1; }
+.dynamic-row .ingredient-unit { flex: 1; }
+.dynamic-row .step-desc { flex: 1; }
+
+.icon-btn {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-muted);
+  border-radius: var(--radius);
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.icon-btn:hover {
+  border-color: var(--color-error);
+  color: var(--color-error);
+}
+
+.add-row-btn {
+  align-self: flex-start;
+  background: none;
+  border: 1px dashed var(--color-border);
+  color: var(--color-muted);
+  border-radius: var(--radius);
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  margin: 0.5rem 0 1rem;
+}
+
+.add-row-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+/* Detail pages */
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.detail-header h1 { margin: 0 0 0.4rem; }
+
+.detail-meta {
+  color: var(--color-muted);
+  font-size: 0.9rem;
+}
+
+.detail-actions {
+  display: flex;
+  gap: 0.6rem;
+  flex-shrink: 0;
+}
+
+/* Members */
+.member-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.member-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+}
+
+.member-row__info {
+  display: flex;
+  flex-direction: column;
+}
+
+.member-row__name { font-size: 0.9rem; }
+.member-row__email { font-size: 0.8rem; color: var(--color-muted); }
+
+.member-row__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Ingredients / steps display */
+.ingredient-list {
+  list-style: disc;
+  padding-left: 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.step-list {
+  list-style: decimal;
+  padding-left: 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}

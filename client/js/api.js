@@ -14,5 +14,29 @@ async function apiFetch(path, options = {}) {
     const err = await res.json().catch(() => ({ message: res.statusText }));
     throw new Error(err.message || 'API error');
   }
+  if (res.status === 204) return null;
   return res.json();
+}
+
+function requireAuth() {
+  const token = localStorage.getItem('token');
+  const user = JSON.parse(localStorage.getItem('user') || 'null');
+  if (!token || !user) {
+    window.location.href = '/login.html';
+    return null;
+  }
+  return user;
+}
+
+function escapeHtml(value) {
+  const div = document.createElement('div');
+  div.textContent = value ?? '';
+  return div.innerHTML;
+}
+
+function showPageError(message) {
+  const el = document.getElementById('page-error');
+  if (!el) return;
+  el.textContent = message;
+  el.hidden = false;
 }

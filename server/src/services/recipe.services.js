@@ -86,6 +86,7 @@ const recipeServices = {
       },
       include: [
         { model: User, as: 'author', attributes: ['id', 'name', 'email', 'avatar'] },
+        { model: Cookbook, attributes: ['id', 'name'] },
         { model: Tag, attributes: ['id', 'name'], through: { attributes: [] } },
       ],
       order: [['createdAt', 'DESC']],
