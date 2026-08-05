@@ -10,6 +10,7 @@ const {
   validateRecipeCreate,
   validateRecipeUpdate,
   validateRecipeIdParam,
+  validateRecipeQuery,
 } = require('../middleware/recipe.validation');
 const { handleValidationErrors } = require('../middleware/validateRequest');
 
@@ -25,7 +26,7 @@ router.post(
   recipeController.create
 );
 
-router.get('/', recipeController.list);
+router.get('/', validateRecipeQuery, handleValidationErrors, recipeController.list);
 
 router.get(
   '/:id',
@@ -33,6 +34,22 @@ router.get(
   handleValidationErrors,
   requireRecipeAccess('READER'),
   recipeController.getById
+);
+
+router.post(
+  '/:id/favorite',
+  validateRecipeIdParam,
+  handleValidationErrors,
+  requireRecipeAccess('READER'),
+  recipeController.addFavorite
+);
+
+router.delete(
+  '/:id/favorite',
+  validateRecipeIdParam,
+  handleValidationErrors,
+  requireRecipeAccess('READER'),
+  recipeController.removeFavorite
 );
 
 router.put(

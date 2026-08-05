@@ -43,6 +43,13 @@
         <h2>Recettes</h2>
         <a id="new-recipe-link" href="#" class="btn btn--primary btn--small">Nouvelle recette</a>
       </div>
+      <form id="cookbook-search-form" class="filter-bar">
+        <input type="search" id="cookbook-search-q" placeholder="Rechercher dans ce cookbook (titre, tags, ingrédients)…" />
+        <div class="filter-bar__actions">
+          <button type="submit" class="btn btn--primary btn--small">Rechercher</button>
+          <button type="button" id="cookbook-search-reset" class="btn btn--secondary btn--small">Réinitialiser</button>
+        </div>
+      </form>
       <div id="cookbook-recipes" class="card-list"></div>
     </section>
   </main>

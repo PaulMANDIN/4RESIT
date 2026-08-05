@@ -1,4 +1,6 @@
-const { body, param } = require('express-validator');
+const { body, param, query } = require('express-validator');
+
+const ALLOWED_SEARCH_FIELDS = ['title', 'tags', 'ingredients'];
 
 const validateRecipeCreate = [
   body('title')
@@ -109,8 +111,43 @@ const validateRecipeIdParam = [
   param('id').isUUID().withMessage('ID de recette invalide.'),
 ];
 
+const validateRecipeQuery = [
+  query('q')
+    .optional({ checkFalsy: true })
+    .trim()
+    .isLength({ max: 200 }).withMessage('La recherche ne peut pas dépasser 200 caractères.'),
+  query('searchIn')
+    .optional({ checkFalsy: true })
+    .custom((value) => {
+      const fields = value.split(',').map((f) => f.trim());
+      if (!fields.every((f) => ALLOWED_SEARCH_FIELDS.includes(f))) {
+        throw new Error(`searchIn ne peut contenir que : ${ALLOWED_SEARCH_FIELDS.join(', ')}.`);
+      }
+      return true;
+    }),
+  query('cookbookId')
+    .optional({ checkFalsy: true })
+    .isUUID().withMessage('ID de cookbook invalide.'),
+  query('tags')
+    .optional({ checkFalsy: true })
+    .isString(),
+  query('ingredients')
+    .optional({ checkFalsy: true })
+    .isString(),
+  query('maxPrepTime')
+    .optional({ checkFalsy: true })
+    .isInt({ min: 0 }).withMessage('maxPrepTime doit être un entier positif.'),
+  query('maxCookTime')
+    .optional({ checkFalsy: true })
+    .isInt({ min: 0 }).withMessage('maxCookTime doit être un entier positif.'),
+  query('favorite')
+    .optional({ checkFalsy: true })
+    .isIn(['true', 'false']).withMessage('favorite doit être true ou false.'),
+];
+
 module.exports = {
   validateRecipeCreate,
   validateRecipeUpdate,
   validateRecipeIdParam,
+  validateRecipeQuery,
 };

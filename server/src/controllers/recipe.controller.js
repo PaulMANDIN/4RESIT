@@ -12,7 +12,7 @@ async function create(req, res) {
       cookbookId, createdById: req.user.userId, ingredients, steps, tags,
     });
 
-    const full = await recipeServices.getRecipeById(recipe.id);
+    const full = await recipeServices.getRecipeByIdForUser(recipe.id, req.user.userId);
     res.status(201).json({ recipe: full });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -21,7 +21,18 @@ async function create(req, res) {
 
 async function list(req, res) {
   try {
-    const recipes = await recipeServices.getRecipesForUser(req.user.userId);
+    const { q, searchIn, cookbookId, tags, ingredients, maxPrepTime, maxCookTime, favorite } = req.query;
+    const filters = {
+      q: q?.trim() || undefined,
+      searchIn: searchIn ? searchIn.split(',').map((f) => f.trim()) : undefined,
+      cookbookId: cookbookId || undefined,
+      tags: tags ? tags.split(',').map((t) => t.trim()).filter(Boolean) : undefined,
+      ingredients: ingredients ? ingredients.split(',').map((i) => i.trim()).filter(Boolean) : undefined,
+      maxPrepTime: maxPrepTime ? Number(maxPrepTime) : undefined,
+      maxCookTime: maxCookTime ? Number(maxCookTime) : undefined,
+      favorite: favorite === 'true',
+    };
+    const recipes = await recipeServices.searchRecipesForUser(req.user.userId, filters);
     res.json({ recipes });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -30,7 +41,7 @@ async function list(req, res) {
 
 async function getById(req, res) {
   try {
-    const recipe = await recipeServices.getRecipeById(req.params.id);
+    const recipe = await recipeServices.getRecipeByIdForUser(req.params.id, req.user.userId);
     if (!recipe) {
       return res.status(404).json({ message: 'Recette non trouvée.' });
     }
@@ -51,14 +62,15 @@ async function update(req, res) {
       data.cookbookId = req.body.cookbookId || null;
     }
 
-    const recipe = await recipeServices.updateRecipe(req.params.id, data, {
+    const updated = await recipeServices.updateRecipe(req.params.id, data, {
       ingredients: req.body.ingredients,
       steps: req.body.steps,
       tags: req.body.tags,
     });
-    if (!recipe) {
+    if (!updated) {
       return res.status(404).json({ message: 'Recette non trouvée.' });
     }
+    const recipe = await recipeServices.getRecipeByIdForUser(updated.id, req.user.userId);
     res.json({ recipe });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -77,4 +89,22 @@ async function remove(req, res) {
   }
 }
 
-module.exports = { create, list, getById, update, remove };
+async function addFavorite(req, res) {
+  try {
+    await recipeServices.addFavorite(req.user.userId, req.params.id);
+    res.status(204).send();
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+}
+
+async function removeFavorite(req, res) {
+  try {
+    await recipeServices.removeFavorite(req.user.userId, req.params.id);
+    res.status(204).send();
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+}
+
+module.exports = { create, list, getById, update, remove, addFavorite, removeFavorite };

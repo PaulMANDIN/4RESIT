@@ -1,6 +1,22 @@
+const Fuse = require('fuse.js');
 const { Op } = require('sequelize');
-const { Recipe, Ingredient, Step, Tag, User, Cookbook } = require('../models');
+const { Recipe, Ingredient, Step, Tag, User, Cookbook, Favorite } = require('../models');
 const sequelize = require('../config/database');
+
+const LIST_INCLUDE = [
+  { model: User, as: 'author', attributes: ['id', 'name', 'email', 'avatar'] },
+  { model: Cookbook, attributes: ['id', 'name'] },
+  { model: Tag, attributes: ['id', 'name'], through: { attributes: [] } },
+];
+
+// Champs sur lesquels la recherche floue (q) peut porter — cf. décision produit :
+// pas de recherche sur description/étapes, uniquement titre/tags/ingrédients.
+const SEARCH_FIELD_CONFIG = {
+  title: { fuseKey: 'title' },
+  tags: { fuseKey: 'Tags.name' },
+  ingredients: { fuseKey: 'Ingredients.name' },
+};
+const DEFAULT_SEARCH_FIELDS = ['title', 'tags', 'ingredients'];
 
 function toIngredientRows(ingredients, recipeId) {
   return ingredients.map((ing, index) => ({
@@ -20,11 +36,108 @@ function toStepRows(steps, recipeId) {
   }));
 }
 
+function normalizeTagName(name) {
+  return name.trim().toLowerCase();
+}
+
+// Normalisé en amont pour éviter que "Dessert" et "dessert" deviennent deux tags distincts
+// (ce qui cassait ensuite le filtre "doit avoir TOUS ces tags", cf. filterIdsByAllTags).
 async function setTagsByName(recipe, tagNames, transaction) {
   const tags = await Promise.all(
-    tagNames.map((name) => Tag.findOrCreate({ where: { name }, transaction }).then(([tag]) => tag))
+    tagNames.map((name) => {
+      const normalized = normalizeTagName(name);
+      return Tag.findOrCreate({ where: { name: normalized }, transaction }).then(([tag]) => tag);
+    })
   );
   await recipe.setTags(tags, { transaction });
+}
+
+async function getAccessibleCookbookIds(userId) {
+  const user = await User.findByPk(userId, {
+    include: [{ model: Cookbook, as: 'cookbooks', attributes: ['id'] }],
+  });
+  return (user?.cookbooks || []).map((c) => c.id);
+}
+
+async function attachFavoriteFlag(recipes, userId) {
+  if (!recipes.length) return recipes;
+  const favs = await Favorite.findAll({
+    where: { userId, recipeId: recipes.map((r) => r.id) },
+    attributes: ['recipeId'],
+    raw: true,
+  });
+  const favSet = new Set(favs.map((f) => f.recipeId));
+  recipes.forEach((r) => { r.dataValues.isFavorite = favSet.has(r.id); });
+  return recipes;
+}
+
+// Filtre structuré "doit avoir TOUS ces tags", par intersection successive. Les noms sont
+// normalisés (cf. normalizeTagName) pour matcher le stockage, quelle que soit la casse tapée
+// par l'utilisateur dans la barre de filtres.
+async function filterIdsByAllTags(baseIds, tagNames) {
+  if (!tagNames.length) return baseIds;
+  if (!baseIds.length) return [];
+
+  const normalized = tagNames.map(normalizeTagName);
+  const tags = await Tag.findAll({ where: { name: normalized }, attributes: ['id'] });
+  if (tags.length < normalized.length) return [];
+
+  const tagIds = tags.map((t) => t.id);
+  const rows = await sequelize.models.RecipeTag.findAll({
+    where: { recipeId: baseIds, tagId: tagIds },
+    attributes: ['recipeId', 'tagId'],
+    raw: true,
+  });
+
+  const byRecipe = new Map();
+  rows.forEach(({ recipeId, tagId }) => {
+    if (!byRecipe.has(recipeId)) byRecipe.set(recipeId, new Set());
+    byRecipe.get(recipeId).add(tagId);
+  });
+
+  return [...byRecipe.entries()]
+    .filter(([, set]) => tagIds.every((id) => set.has(id)))
+    .map(([id]) => id);
+}
+
+// Filtre structuré "doit contenir TOUS ces ingrédients" (par nom partiel), par intersection successive.
+async function filterIdsByAllIngredients(baseIds, terms) {
+  if (!terms.length) return baseIds;
+  let ids = baseIds;
+
+  for (const term of terms) {
+    if (!ids.length) break;
+    const rows = await Ingredient.findAll({
+      where: { recipeId: ids, name: { [Op.iLike]: `%${term}%` } },
+      attributes: ['recipeId'],
+      raw: true,
+    });
+    const idSet = new Set(rows.map((r) => r.recipeId));
+    ids = ids.filter((id) => idSet.has(id));
+  }
+
+  return ids;
+}
+
+// Classement flou par Fuse.js sur les champs sélectionnés (titre/tags/ingrédients), directement
+// sur les recettes déjà réduites par les filtres structurés (baseIds) : pas de préfiltre SQL ILIKE
+// ici, car ce préfiltre est à ordre strict et casserait la tolérance aux fautes de frappe/transpositions
+// que Fuse.js est censé apporter (ex: "puolet" ne matche jamais "poulet" via un pattern %p%u%o%l%e%t%).
+async function rankByQuery(baseIds, q, searchFields) {
+  if (!baseIds.length) return [];
+
+  const needsIngredients = searchFields.includes('ingredients');
+  const recipes = await Recipe.findAll({
+    where: { id: baseIds },
+    include: needsIngredients ? [...LIST_INCLUDE, { model: Ingredient }] : LIST_INCLUDE,
+  });
+
+  // threshold 0.35 : tolère une faute de frappe/transposition (ex: "puolet" -> "poulet") sans
+  // faire remonter des recettes sans rapport (0.7, repris tel quel de 4Proj, était trop permissif
+  // ici ; testé en local avec fuse.js sur des cas réels avant de fixer cette valeur).
+  const keys = searchFields.map((field) => SEARCH_FIELD_CONFIG[field].fuseKey);
+  const fuse = new Fuse(recipes, { keys, threshold: 0.35, ignoreLocation: true });
+  return fuse.search(q).map((r) => r.item);
 }
 
 const recipeServices = {
@@ -71,26 +184,53 @@ const recipeServices = {
     });
   },
 
-  async getRecipesForUser(userId) {
-    const user = await User.findByPk(userId, {
-      include: [{ model: Cookbook, as: 'cookbooks', attributes: ['id'] }],
-    });
-    const cookbookIds = (user?.cookbooks || []).map((c) => c.id);
+  async getRecipeByIdForUser(id, userId) {
+    const recipe = await recipeServices.getRecipeById(id);
+    if (!recipe) return null;
+    await attachFavoriteFlag([recipe], userId);
+    return recipe;
+  },
 
-    return Recipe.findAll({
-      where: {
-        [Op.or]: [
-          { createdById: userId },
-          ...(cookbookIds.length ? [{ cookbookId: cookbookIds }] : []),
-        ],
-      },
-      include: [
-        { model: User, as: 'author', attributes: ['id', 'name', 'email', 'avatar'] },
-        { model: Cookbook, attributes: ['id', 'name'] },
-        { model: Tag, attributes: ['id', 'name'], through: { attributes: [] } },
+  // Filtrage (cookbook, tags, ingrédients, temps, favoris) + recherche floue (titre/tags/ingrédients).
+  async searchRecipesForUser(userId, filters = {}) {
+    const { q, searchIn, cookbookId, tags, ingredients, maxPrepTime, maxCookTime, favorite } = filters;
+
+    const cookbookIds = await getAccessibleCookbookIds(userId);
+    const where = {
+      [Op.or]: [
+        { createdById: userId },
+        ...(cookbookIds.length ? [{ cookbookId: cookbookIds }] : []),
       ],
-      order: [['createdAt', 'DESC']],
-    });
+    };
+    if (cookbookId) where.cookbookId = cookbookId;
+    if (maxPrepTime !== undefined) where.prepTime = { [Op.lte]: maxPrepTime };
+    if (maxCookTime !== undefined) where.cookTime = { [Op.lte]: maxCookTime };
+
+    let baseIds = (await Recipe.findAll({ where, attributes: ['id'], raw: true })).map((r) => r.id);
+
+    if (favorite) {
+      const favs = await Favorite.findAll({ where: { userId, recipeId: baseIds }, attributes: ['recipeId'], raw: true });
+      const favSet = new Set(favs.map((f) => f.recipeId));
+      baseIds = baseIds.filter((id) => favSet.has(id));
+    }
+
+    if (tags?.length) baseIds = await filterIdsByAllTags(baseIds, tags);
+    if (ingredients?.length) baseIds = await filterIdsByAllIngredients(baseIds, ingredients);
+
+    let recipes;
+    if (q) {
+      const activeFields = (searchIn?.length ? searchIn : DEFAULT_SEARCH_FIELDS)
+        .filter((field) => SEARCH_FIELD_CONFIG[field]);
+      recipes = await rankByQuery(baseIds, q, activeFields);
+    } else {
+      recipes = await Recipe.findAll({
+        where: { id: baseIds },
+        include: LIST_INCLUDE,
+        order: [['createdAt', 'DESC']],
+      });
+    }
+
+    return attachFavoriteFlag(recipes, userId);
   },
 
   async updateRecipe(id, data, { ingredients, steps, tags } = {}) {
@@ -123,6 +263,14 @@ const recipeServices = {
 
   deleteRecipe(id) {
     return Recipe.destroy({ where: { id } });
+  },
+
+  addFavorite(userId, recipeId) {
+    return Favorite.findOrCreate({ where: { userId, recipeId } });
+  },
+
+  removeFavorite(userId, recipeId) {
+    return Favorite.destroy({ where: { userId, recipeId } });
   },
 };
 

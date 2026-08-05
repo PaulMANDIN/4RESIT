@@ -276,17 +276,44 @@ main.container {
 }
 
 .card {
+  position: relative;
   display: block;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
   padding: 1.2rem;
-  text-decoration: none;
-  color: inherit;
 }
 
 .card:hover {
   border-color: var(--color-primary);
+}
+
+.card__link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  padding-right: 1.8rem;
+}
+
+.favorite-btn {
+  position: absolute;
+  top: 0.9rem;
+  right: 0.9rem;
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  line-height: 1;
+  color: var(--color-muted);
+  cursor: pointer;
+  padding: 0;
+}
+
+.favorite-btn:hover {
+  color: var(--color-primary);
+}
+
+.favorite-btn--active {
+  color: var(--color-primary);
 }
 
 .card__header {
@@ -436,6 +463,67 @@ a.btn {
   border-radius: var(--radius);
   font-size: 0.9rem;
   font-family: var(--font);
+}
+
+/* Filter / search bar */
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.filter-bar input[type="search"],
+.filter-bar input[type="text"],
+.filter-bar input[type="number"],
+.filter-bar select {
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  font-family: var(--font);
+}
+
+.filter-bar input[type="number"] {
+  width: 5rem;
+}
+
+.filter-bar label {
+  font-size: 0.85rem;
+  color: var(--color-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.filter-bar__checkboxes {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.filter-bar__checkboxes legend {
+  font-size: 0.8rem;
+  color: var(--color-muted);
+  padding: 0;
+}
+
+.filter-bar__checkboxes label {
+  font-size: 0.85rem;
+}
+
+.filter-bar__actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-left: auto;
 }
 
 /* Dynamic rows (ingredients / steps) */

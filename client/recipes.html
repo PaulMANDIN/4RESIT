@@ -27,6 +27,28 @@
 
     <p id="page-error" class="alert alert--error" hidden></p>
 
+    <form id="filter-form" class="filter-bar">
+      <input type="search" id="filter-q" placeholder="Rechercher…" />
+      <fieldset class="filter-bar__checkboxes">
+        <legend>Rechercher dans</legend>
+        <label><input type="checkbox" id="filter-search-title" checked /> Titre</label>
+        <label><input type="checkbox" id="filter-search-tags" checked /> Tags</label>
+        <label><input type="checkbox" id="filter-search-ingredients" checked /> Ingrédients</label>
+      </fieldset>
+      <select id="filter-cookbook">
+        <option value="">Tous les cookbooks</option>
+      </select>
+      <input type="text" id="filter-tags" placeholder="Tags (séparés par virgule)" />
+      <input type="text" id="filter-ingredients" placeholder="Ingrédients (séparés par virgule)" />
+      <label>Prépa max (min) <input type="number" id="filter-max-prep" min="0" /></label>
+      <label>Cuisson max (min) <input type="number" id="filter-max-cook" min="0" /></label>
+      <label><input type="checkbox" id="filter-favorite" /> Favoris uniquement</label>
+      <div class="filter-bar__actions">
+        <button type="submit" class="btn btn--primary btn--small">Filtrer</button>
+        <button type="button" id="filter-reset" class="btn btn--secondary btn--small">Réinitialiser</button>
+      </div>
+    </form>
+
     <div id="recipe-list" class="card-list"></div>
   </main>
 

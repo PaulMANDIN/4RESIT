@@ -117,13 +117,63 @@ function renderMembers(cookbook) {
 
 function cookbookRecipeCard(recipe) {
   return `
-    <a class="card" href="/recipe.html?id=${recipe.id}">
-      <div class="card__header">
-        <h3>${escapeHtml(recipe.title)}</h3>
-      </div>
-      ${recipe.description ? `<p class="card__desc">${escapeHtml(recipe.description)}</p>` : ''}
-    </a>
+    <div class="card" data-recipe-id="${recipe.id}">
+      <a class="card__link" href="/recipe.html?id=${recipe.id}">
+        <div class="card__header">
+          <h3>${escapeHtml(recipe.title)}</h3>
+        </div>
+        ${recipe.description ? `<p class="card__desc">${escapeHtml(recipe.description)}</p>` : ''}
+        ${recipe.Tags?.length ? `<div class="tag-list">${recipe.Tags.map((t) => `<span class="tag-badge">${escapeHtml(t.name)}</span>`).join('')}</div>` : ''}
+      </a>
+      <button type="button" class="favorite-btn ${recipe.isFavorite ? 'favorite-btn--active' : ''}" title="Favori">${recipe.isFavorite ? '★' : '☆'}</button>
+    </div>
   `;
+}
+
+function initFavoriteButtons() {
+  document.querySelectorAll('.favorite-btn').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const card = btn.closest('.card');
+      const recipeId = card.dataset.recipeId;
+      const isActive = btn.classList.contains('favorite-btn--active');
+      try {
+        await apiFetch(`/recipes/${recipeId}/favorite`, { method: isActive ? 'DELETE' : 'POST' });
+        btn.classList.toggle('favorite-btn--active');
+        btn.textContent = isActive ? '☆' : '★';
+      } catch (err) {
+        showPageError(err.message);
+      }
+    });
+  });
+}
+
+async function loadCookbookRecipes(cookbookId) {
+  const q = document.getElementById('cookbook-search-q').value.trim();
+  const params = new URLSearchParams({ cookbookId });
+  if (q) params.set('q', q);
+
+  const container = document.getElementById('cookbook-recipes');
+  try {
+    const { recipes } = await apiFetch(`/recipes?${params.toString()}`);
+    container.innerHTML = recipes.length
+      ? recipes.map(cookbookRecipeCard).join('')
+      : '<p class="empty-state">Aucune recette dans ce cookbook.</p>';
+    initFavoriteButtons();
+  } catch (err) {
+    showPageError(err.message);
+  }
+}
+
+function initCookbookSearchForm(cookbookId) {
+  const form = document.getElementById('cookbook-search-form');
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    loadCookbookRecipes(cookbookId);
+  });
+  document.getElementById('cookbook-search-reset').addEventListener('click', () => {
+    document.getElementById('cookbook-search-q').value = '';
+    loadCookbookRecipes(cookbookId);
+  });
 }
 
 async function loadCookbook() {
@@ -146,12 +196,7 @@ async function loadCookbook() {
 
     document.getElementById('new-recipe-link').href = `/recipe-form.html?cookbookId=${id}`;
 
-    const { recipes } = await apiFetch('/recipes');
-    const cookbookRecipes = recipes.filter((r) => r.cookbookId === id);
-    const container = document.getElementById('cookbook-recipes');
-    container.innerHTML = cookbookRecipes.length
-      ? cookbookRecipes.map(cookbookRecipeCard).join('')
-      : '<p class="empty-state">Aucune recette dans ce cookbook.</p>';
+    await loadCookbookRecipes(id);
   } catch (err) {
     showPageError(err.message);
   }
@@ -181,5 +226,7 @@ function initAddMemberForm() {
 document.addEventListener('DOMContentLoaded', () => {
   if (!requireAuth()) return;
   initAddMemberForm();
+  const id = getCookbookIdFromUrl();
+  if (id) initCookbookSearchForm(id);
   loadCookbook();
 });

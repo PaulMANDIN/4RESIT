@@ -19,6 +19,7 @@ function renderRecipe(recipe) {
         ${recipe.Tags?.length ? `<div class="tag-list">${recipe.Tags.map((t) => `<span class="tag-badge">${escapeHtml(t.name)}</span>`).join('')}</div>` : ''}
       </div>
       <div class="detail-actions">
+        <button id="favorite-recipe-btn" class="btn btn--secondary btn--small ${recipe.isFavorite ? 'favorite-btn--active' : ''}">${recipe.isFavorite ? '★ Favori' : '☆ Favori'}</button>
         <a href="/recipe-form.html?id=${recipe.id}" class="btn btn--secondary btn--small">Modifier</a>
         <button id="delete-recipe-btn" class="btn btn--danger btn--small">Supprimer</button>
       </div>
@@ -46,6 +47,18 @@ function renderRecipe(recipe) {
     try {
       await apiFetch(`/recipes/${recipe.id}`, { method: 'DELETE' });
       window.location.href = recipe.Cookbook ? `/cookbook.html?id=${recipe.Cookbook.id}` : '/recipes.html';
+    } catch (err) {
+      showPageError(err.message);
+    }
+  });
+
+  document.getElementById('favorite-recipe-btn').addEventListener('click', async (e) => {
+    const btn = e.currentTarget;
+    const isActive = btn.classList.contains('favorite-btn--active');
+    try {
+      await apiFetch(`/recipes/${recipe.id}/favorite`, { method: isActive ? 'DELETE' : 'POST' });
+      btn.classList.toggle('favorite-btn--active');
+      btn.textContent = isActive ? '☆ Favori' : '★ Favori';
     } catch (err) {
       showPageError(err.message);
     }
