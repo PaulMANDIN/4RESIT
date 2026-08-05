@@ -1,4 +1,5 @@
 const cookbookServices = require('../services/cookbook.services');
+const messageServices = require('../services/message.services');
 
 async function create(req, res) {
   try {
@@ -133,4 +134,13 @@ async function removeMember(req, res) {
   }
 }
 
-module.exports = { create, list, getById, update, remove, addMember, updateMemberRole, removeMember };
+async function listMessages(req, res) {
+  try {
+    const messages = await messageServices.getMessagesForCookbook(req.params.id);
+    res.json({ messages });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+}
+
+module.exports = { create, list, getById, update, remove, addMember, updateMemberRole, removeMember, listMessages };

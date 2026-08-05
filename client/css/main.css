@@ -643,6 +643,67 @@ a.btn {
   gap: 0.5rem;
 }
 
+/* Chat */
+.chat-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  max-height: 320px;
+  overflow-y: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.chat-message {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.chat-message__author {
+  font-weight: 600;
+  color: var(--color-primary-dark);
+  flex-shrink: 0;
+}
+
+.chat-message__content {
+  word-break: break-word;
+}
+
+/* Comments */
+.comment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.comment {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  padding: 0.75rem 0.9rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.comment__author {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--color-primary-dark);
+  margin-right: 0.4rem;
+}
+
+.comment__content {
+  font-size: 0.9rem;
+  word-break: break-word;
+}
+
 /* Ingredients / steps display */
 .ingredient-list {
   list-style: disc;

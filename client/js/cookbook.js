@@ -202,6 +202,68 @@ async function loadCookbook() {
   }
 }
 
+function messageBubble(message) {
+  return `
+    <div class="chat-message">
+      <span class="chat-message__author">${escapeHtml(message.User.name)}</span>
+      <span class="chat-message__content">${escapeHtml(message.content)}</span>
+    </div>
+  `;
+}
+
+function appendMessage(message) {
+  const container = document.getElementById('chat-messages');
+  container.insertAdjacentHTML('beforeend', messageBubble(message));
+  container.scrollTop = container.scrollHeight;
+}
+
+async function loadMessageHistory(cookbookId) {
+  const container = document.getElementById('chat-messages');
+  try {
+    const { messages } = await apiFetch(`/cookbooks/${cookbookId}/messages`);
+    container.innerHTML = messages.length
+      ? messages.map(messageBubble).join('')
+      : '<p class="empty-state">Aucun message pour le moment.</p>';
+    container.scrollTop = container.scrollHeight;
+  } catch (err) {
+    showPageError(err.message);
+  }
+}
+
+function initChat(cookbookId) {
+  const token = localStorage.getItem('token');
+  const socket = io({ auth: { token } });
+
+  socket.on('connect', () => {
+    socket.emit('cookbook:join', cookbookId, (res) => {
+      if (res?.error) showPageError(res.error);
+    });
+  });
+
+  socket.on('message:new', (message) => {
+    if (message.cookbookId === cookbookId) appendMessage(message);
+  });
+
+  socket.on('connect_error', (err) => {
+    showPageError(err.message);
+  });
+
+  document.getElementById('chat-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const input = document.getElementById('chat-input');
+    const content = input.value.trim();
+    if (!content) return;
+
+    socket.emit('message:send', { cookbookId, content }, (res) => {
+      if (res?.error) {
+        showPageError(res.error);
+      } else {
+        input.value = '';
+      }
+    });
+  });
+}
+
 function initAddMemberForm() {
   const form = document.getElementById('add-member-form');
   form.addEventListener('submit', async (e) => {
@@ -227,6 +289,10 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!requireAuth()) return;
   initAddMemberForm();
   const id = getCookbookIdFromUrl();
-  if (id) initCookbookSearchForm(id);
+  if (id) {
+    initCookbookSearchForm(id);
+    loadMessageHistory(id);
+    initChat(id);
+  }
   loadCookbook();
 });

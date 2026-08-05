@@ -72,4 +72,12 @@ router.delete(
   cookbookController.removeMember
 );
 
+router.get(
+  '/:id/messages',
+  validateCookbookIdParam,
+  handleValidationErrors,
+  requireCookbookRole('READER'),
+  cookbookController.listMessages
+);
+
 module.exports = router;

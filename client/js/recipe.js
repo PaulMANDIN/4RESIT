@@ -40,6 +40,17 @@ function renderRecipe(recipe) {
         ? `<ol class="step-list">${recipe.Steps.map((s) => `<li>${escapeHtml(s.description)}</li>`).join('')}</ol>`
         : '<p class="empty-state">Aucune étape renseignée.</p>'}
     </section>
+
+    ${recipe.Cookbook ? `
+    <section class="section">
+      <h2>Commentaires</h2>
+      <div id="comment-list" class="comment-list"></div>
+      <form id="comment-form" class="inline-form">
+        <input type="text" id="comment-content" placeholder="Ajouter un commentaire…" maxlength="2000" required />
+        <button type="submit" class="btn btn--secondary">Commenter</button>
+      </form>
+    </section>
+    ` : ''}
   `;
 
   document.getElementById('delete-recipe-btn').addEventListener('click', async () => {
@@ -59,6 +70,72 @@ function renderRecipe(recipe) {
       await apiFetch(`/recipes/${recipe.id}/favorite`, { method: isActive ? 'DELETE' : 'POST' });
       btn.classList.toggle('favorite-btn--active');
       btn.textContent = isActive ? '☆ Favori' : '★ Favori';
+    } catch (err) {
+      showPageError(err.message);
+    }
+  });
+
+  if (recipe.Cookbook) {
+    initComments(recipe.id);
+  }
+}
+
+function commentRow(comment) {
+  return `
+    <div class="comment" data-comment-id="${comment.id}">
+      <div>
+        <span class="comment__author">${escapeHtml(comment.User.name)}</span>
+        <span class="comment__content">${escapeHtml(comment.content)}</span>
+      </div>
+      <button type="button" class="icon-btn comment-remove-btn" title="Supprimer">&times;</button>
+    </div>
+  `;
+}
+
+function initCommentDeleteButtons(recipeId) {
+  document.querySelectorAll('.comment-remove-btn').forEach((btn) => {
+    btn.addEventListener('click', async (e) => {
+      const commentId = e.target.closest('.comment').dataset.commentId;
+      if (!confirm('Supprimer ce commentaire ?')) return;
+      try {
+        await apiFetch(`/recipes/${recipeId}/comments/${commentId}`, { method: 'DELETE' });
+        await loadComments(recipeId);
+      } catch (err) {
+        showPageError(err.message);
+      }
+    });
+  });
+}
+
+async function loadComments(recipeId) {
+  const list = document.getElementById('comment-list');
+  try {
+    const { comments } = await apiFetch(`/recipes/${recipeId}/comments`);
+    list.innerHTML = comments.length
+      ? comments.map(commentRow).join('')
+      : '<p class="empty-state">Aucun commentaire pour le moment.</p>';
+    initCommentDeleteButtons(recipeId);
+  } catch (err) {
+    showPageError(err.message);
+  }
+}
+
+function initComments(recipeId) {
+  loadComments(recipeId);
+
+  document.getElementById('comment-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const input = document.getElementById('comment-content');
+    const content = input.value.trim();
+    if (!content) return;
+
+    try {
+      await apiFetch(`/recipes/${recipeId}/comments`, {
+        method: 'POST',
+        body: JSON.stringify({ content }),
+      });
+      input.value = '';
+      await loadComments(recipeId);
     } catch (err) {
       showPageError(err.message);
     }

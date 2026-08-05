@@ -1,17 +1,20 @@
 const { Router } = require('express');
 const recipeController = require('../controllers/recipe.controller');
+const commentController = require('../controllers/comment.controller');
 const { requireAuth } = require('../middleware/auth');
 const {
   requireRecipeAccess,
   requireCookbookEditorForCreate,
   requireRecipeCookbookChangeAllowed,
 } = require('../middleware/recipe');
+const { requireCommentAccess } = require('../middleware/comment');
 const {
   validateRecipeCreate,
   validateRecipeUpdate,
   validateRecipeIdParam,
   validateRecipeQuery,
 } = require('../middleware/recipe.validation');
+const { validateCommentCreate, validateCommentIdParam } = require('../middleware/comment.validation');
 const { handleValidationErrors } = require('../middleware/validateRequest');
 
 const router = Router();
@@ -68,6 +71,32 @@ router.delete(
   handleValidationErrors,
   requireRecipeAccess('EDITOR'),
   recipeController.remove
+);
+
+router.get(
+  '/:id/comments',
+  validateRecipeIdParam,
+  handleValidationErrors,
+  requireCommentAccess('READER'),
+  commentController.list
+);
+
+router.post(
+  '/:id/comments',
+  validateRecipeIdParam,
+  validateCommentCreate,
+  handleValidationErrors,
+  requireCommentAccess('COMMENTER'),
+  commentController.create
+);
+
+router.delete(
+  '/:id/comments/:commentId',
+  validateRecipeIdParam,
+  validateCommentIdParam,
+  handleValidationErrors,
+  requireCommentAccess('READER'),
+  commentController.remove
 );
 
 module.exports = router;
