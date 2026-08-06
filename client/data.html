@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Export / Import — SUPMEAL</title>
+  <link rel="stylesheet" href="/css/main.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="brand" href="/index.html">SUPMEAL</a>
+      <nav class="nav">
+        <a href="/index.html">Accueil</a>
+        <a href="/login.html">Connexion</a>
+        <a href="/register.html">Inscription</a>
+      </nav>
+      <span id="api-status" class="status-badge status-badge--loading">API : vérification…</span>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="page-header">
+      <h1>Export / Import</h1>
+    </div>
+
+    <p id="page-error" class="alert alert--error" hidden></p>
+
+    <section class="section">
+      <h2>Exporter mes données</h2>
+      <p class="empty-state">
+        Exporte l'ensemble de tes recettes personnelles et de tes cookbooks (avec toutes leurs recettes)
+        dans un fichier en clair. Ce fichier contiendra toutes ces données en texte lisible :
+        ne le partage qu'avec des personnes de confiance.
+      </p>
+      <form id="export-form" class="inline-form">
+        <select id="export-format">
+          <option value="json">JSON</option>
+          <option value="csv">CSV</option>
+          <option value="mealie">Mealie (JSON)</option>
+        </select>
+        <button type="submit" class="btn btn--primary btn--small">Télécharger l'export</button>
+      </form>
+    </section>
+
+    <section class="section">
+      <h2>Importer des données</h2>
+      <p class="empty-state">
+        Importe un fichier JSON, CSV ou compatible Mealie. Les recettes personnelles seront ajoutées
+        à ton compte, et les cookbooks seront recréés avec toi comme créateur.
+      </p>
+      <p id="import-success" class="alert alert--success" hidden></p>
+      <form id="import-form" class="inline-form">
+        <select id="import-format">
+          <option value="json">JSON</option>
+          <option value="csv">CSV</option>
+          <option value="mealie">Mealie (JSON)</option>
+        </select>
+        <input type="file" id="import-file" accept=".json,.csv,application/json,text/csv" required />
+        <button type="submit" class="btn btn--primary btn--small">Importer</button>
+      </form>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>SUPMEAL &mdash; Projet SUPINFO M1</p>
+    </div>
+  </footer>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/app.js"></script>
+  <script src="/js/data.js"></script>
+</body>
+</html>
