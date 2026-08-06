@@ -1,6 +1,9 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { OAuth2Client } = require('google-auth-library');
 const authServices = require('../services/auth.services');
+
+const googleClient = process.env.GOOGLE_CLIENT_ID ? new OAuth2Client(process.env.GOOGLE_CLIENT_ID) : null;
 
 function signToken(user) {
   return jwt.sign(
@@ -61,14 +64,55 @@ async function me(req, res) {
   }
 }
 
-// Structure prête pour la connexion Google : le front enverra le idToken obtenu
-// via Google Identity Services, vérifié ici avec google-auth-library.
-// Vérification réelle à brancher une fois les credentials Google Cloud configurés.
+// Le front envoie le idToken obtenu via Google Identity Services (bouton "Sign in with Google").
+// Vérifié ici via google-auth-library : audience = notre GOOGLE_CLIENT_ID, signature vérifiée
+// contre les clés publiques Google. Aucune redirection, pas de client secret nécessaire pour ce flow.
 async function googleAuth(req, res) {
-  if (!process.env.GOOGLE_CLIENT_ID) {
+  if (!googleClient) {
     return res.status(501).json({ message: "Connexion Google non configurée pour l'instant." });
   }
-  res.status(501).json({ message: 'Vérification du token Google pas encore implémentée.' });
+
+  try {
+    const ticket = await googleClient.verifyIdToken({
+      idToken: req.body.idToken,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+
+    if (!payload.email_verified) {
+      return res.status(401).json({ message: 'Email Google non vérifié.' });
+    }
+
+    // Normalisé en minuscules comme register/login (validateRegister/validateLogin le font via
+    // le sanitizer .toLowerCase()) : sans ça, un email Google à la casse différente ne matcherait
+    // pas un compte existant et créerait un doublon.
+    const email = payload.email.toLowerCase();
+    let user = await authServices.getUserByOAuthAccount('google', payload.sub);
+
+    if (!user) {
+      // Email Google déjà vérifié par Google lui-même : on peut relier en confiance à un compte
+      // existant créé par email/mot de passe avec la même adresse, plutôt que de dupliquer l'utilisateur.
+      user = await authServices.getUserByEmail(email);
+      if (!user) {
+        user = await authServices.createUser({
+          name: payload.name || email,
+          email,
+          passwordHash: null,
+          avatar: payload.picture || null,
+        });
+        await authServices.createDefaultPreferences(user.id);
+      }
+      await authServices.linkOAuthAccount({ userId: user.id, provider: 'google', providerId: payload.sub });
+    }
+
+    res.json({ token: signToken(user), user: toPublicUser(user) });
+  } catch (err) {
+    res.status(401).json({ message: 'Jeton Google invalide.' });
+  }
 }
 
-module.exports = { register, login, me, googleAuth, signToken, toPublicUser };
+function googleConfig(req, res) {
+  res.json({ clientId: process.env.GOOGLE_CLIENT_ID || null });
+}
+
+module.exports = { register, login, me, googleAuth, googleConfig, signToken, toPublicUser };

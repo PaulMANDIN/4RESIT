@@ -1,4 +1,4 @@
-const { User, UserPreference } = require('../models');
+const { User, UserPreference, OAuthAccount } = require('../models');
 
 const authServices = {
   createUser({ name, email, passwordHash, avatar = null }) {
@@ -15,6 +15,15 @@ const authServices = {
 
   getUserById(id) {
     return User.findByPk(id);
+  },
+
+  async getUserByOAuthAccount(provider, providerId) {
+    const account = await OAuthAccount.findOne({ where: { provider, providerId }, include: User });
+    return account?.User || null;
+  },
+
+  linkOAuthAccount({ userId, provider, providerId }) {
+    return OAuthAccount.create({ userId, provider, providerId });
   },
 };
 

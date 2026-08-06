@@ -177,15 +177,9 @@ main.container {
   background: var(--color-primary-dark);
 }
 
-.btn--google {
-  background: var(--color-surface);
-  color: var(--color-text);
-  border: 1px solid var(--color-border);
-  width: 100%;
-}
-
-.btn--google:hover {
-  border-color: var(--color-primary);
+.google-signin-button {
+  display: flex;
+  justify-content: center;
 }
 
 .auth-divider {

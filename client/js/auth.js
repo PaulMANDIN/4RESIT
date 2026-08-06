@@ -10,12 +10,28 @@ function storeSession(token, user) {
   localStorage.setItem('user', JSON.stringify(user));
 }
 
-async function handleGoogleLogin() {
+async function handleGoogleCredential(response) {
   try {
-    await apiFetch('/auth/google', { method: 'POST', body: JSON.stringify({}) });
+    const { token, user } = await apiFetch('/auth/google', {
+      method: 'POST',
+      body: JSON.stringify({ idToken: response.credential }),
+    });
+    storeSession(token, user);
+    window.location.href = '/index.html';
   } catch (err) {
     showFormError(err.message);
   }
+}
+
+async function initGoogleSignIn() {
+  const container = document.getElementById('google-signin-button');
+  if (!container || !window.google) return;
+
+  const { clientId } = await apiFetch('/auth/google/config').catch(() => ({ clientId: null }));
+  if (!clientId) return;
+
+  google.accounts.id.initialize({ client_id: clientId, callback: handleGoogleCredential });
+  google.accounts.id.renderButton(container, { theme: 'outline', size: 'large', width: 320 });
 }
 
 function initLoginForm() {
@@ -72,9 +88,5 @@ function initRegisterForm() {
 document.addEventListener('DOMContentLoaded', () => {
   initLoginForm();
   initRegisterForm();
-
-  const googleBtn = document.getElementById('google-login');
-  if (googleBtn) {
-    googleBtn.addEventListener('click', handleGoogleLogin);
-  }
+  initGoogleSignIn();
 });

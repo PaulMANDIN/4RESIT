@@ -25,4 +25,9 @@ const validateLogin = [
     .notEmpty().withMessage('Le mot de passe est obligatoire.'),
 ];
 
-module.exports = { validateRegister, validateLogin };
+const validateGoogleAuth = [
+  body('idToken')
+    .notEmpty().withMessage('idToken est obligatoire.'),
+];
+
+module.exports = { validateRegister, validateLogin, validateGoogleAuth };
