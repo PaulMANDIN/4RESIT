@@ -25,6 +25,22 @@ const authServices = {
   linkOAuthAccount({ userId, provider, providerId }) {
     return OAuthAccount.create({ userId, provider, providerId });
   },
+
+  async updateUser(id, data) {
+    await User.update(data, { where: { id } });
+    return User.findByPk(id);
+  },
+
+  async getPreferences(userId) {
+    const [preferences] = await UserPreference.findOrCreate({ where: { userId } });
+    return preferences;
+  },
+
+  async updatePreferences(userId, data) {
+    await UserPreference.findOrCreate({ where: { userId } });
+    await UserPreference.update(data, { where: { userId } });
+    return UserPreference.findByPk(userId);
+  },
 };
 
 module.exports = authServices;

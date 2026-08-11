@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Paramètres — SUPMEAL</title>
+  <link rel="stylesheet" href="/css/main.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="brand" href="/index.html">SUPMEAL</a>
+      <nav class="nav">
+        <a href="/index.html">Accueil</a>
+        <a href="/login.html">Connexion</a>
+        <a href="/register.html">Inscription</a>
+      </nav>
+      <span id="api-status" class="status-badge status-badge--loading">API : vérification…</span>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="page-header">
+      <h1>Paramètres</h1>
+    </div>
+
+    <p id="page-error" class="alert alert--error" hidden></p>
+    <p id="page-success" class="alert alert--success" hidden></p>
+
+    <section class="section">
+      <h2>Profil</h2>
+      <form id="profile-form" class="form">
+        <label for="profile-name">Nom</label>
+        <input type="text" id="profile-name" required maxlength="50" />
+        <label for="profile-avatar">URL de l'avatar</label>
+        <input type="text" id="profile-avatar" maxlength="255" />
+        <div class="form-actions">
+          <button type="submit" class="btn btn--primary">Enregistrer</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="section">
+      <h2>Mot de passe</h2>
+      <form id="password-form" class="form">
+        <label for="current-password">Mot de passe actuel</label>
+        <input type="password" id="current-password" autocomplete="current-password" />
+        <p class="empty-state">Laisse ce champ vide si tu n'as pas encore de mot de passe (compte créé via Google).</p>
+        <label for="new-password">Nouveau mot de passe</label>
+        <input type="password" id="new-password" required minlength="8" autocomplete="new-password" />
+        <label for="confirm-new-password">Confirmer le nouveau mot de passe</label>
+        <input type="password" id="confirm-new-password" required minlength="8" autocomplete="new-password" />
+        <div class="form-actions">
+          <button type="submit" class="btn btn--primary">Changer le mot de passe</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="section">
+      <h2>Préférences culinaires</h2>
+      <form id="preferences-form" class="form">
+        <label for="pref-diet">Régime alimentaire (séparés par des virgules)</label>
+        <input type="text" id="pref-diet" placeholder="végétarien, sans gluten" />
+        <label for="pref-allergies">Allergies (séparées par des virgules)</label>
+        <input type="text" id="pref-allergies" placeholder="arachides, lactose" />
+        <label for="pref-cuisine-types">Types de cuisine préférés (séparés par des virgules)</label>
+        <input type="text" id="pref-cuisine-types" placeholder="italienne, japonaise" />
+        <label for="pref-default-portions">Portions par défaut</label>
+        <input type="number" id="pref-default-portions" min="1" />
+        <div class="form-actions">
+          <button type="submit" class="btn btn--primary">Enregistrer les préférences</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>SUPMEAL &mdash; Projet SUPINFO M1</p>
+    </div>
+  </footer>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/app.js"></script>
+  <script src="/js/settings.js"></script>
+</body>
+</html>

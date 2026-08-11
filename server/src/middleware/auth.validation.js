@@ -30,4 +30,43 @@ const validateGoogleAuth = [
     .notEmpty().withMessage('idToken est obligatoire.'),
 ];
 
-module.exports = { validateRegister, validateLogin, validateGoogleAuth };
+const validateUpdateProfile = [
+  body('name')
+    .optional()
+    .trim()
+    .notEmpty().withMessage('Le nom ne peut pas être vide.')
+    .isLength({ min: 2, max: 50 }).withMessage('Le nom doit contenir entre 2 et 50 caractères.'),
+  body('avatar')
+    .optional({ checkFalsy: true })
+    .isLength({ max: 255 }).withMessage("L'URL de l'avatar ne peut pas dépasser 255 caractères."),
+];
+
+const validateChangePassword = [
+  body('currentPassword')
+    .optional(),
+  body('newPassword')
+    .notEmpty().withMessage('Le nouveau mot de passe est obligatoire.')
+    .isLength({ min: 8 }).withMessage('Le nouveau mot de passe doit contenir au moins 8 caractères.'),
+];
+
+const CUISINE_LIST_FIELDS = ['diet', 'allergies', 'cuisineTypes'];
+const validateUpdatePreferences = [
+  ...CUISINE_LIST_FIELDS.flatMap((field) => [
+    body(field).optional().isArray().withMessage(`${field} doit être un tableau.`),
+    body(`${field}.*`)
+      .trim()
+      .notEmpty().withMessage('Les valeurs ne peuvent pas être vides.')
+      .isLength({ max: 50 }).withMessage('Chaque valeur ne peut pas dépasser 50 caractères.'),
+  ]),
+  // Pas de checkFalsy ici : contrairement à prepTime/cookTime (min: 0, où 0 est une valeur
+  // valide), defaultPortions a min: 1 — avec checkFalsy, la valeur 0 (falsy) aurait été traitée
+  // comme "absente" et aurait échappé à la validation isInt au lieu d'être rejetée.
+  body('defaultPortions')
+    .optional()
+    .isInt({ min: 1 }).withMessage('Le nombre de portions par défaut doit être un entier positif.'),
+];
+
+module.exports = {
+  validateRegister, validateLogin, validateGoogleAuth,
+  validateUpdateProfile, validateChangePassword, validateUpdatePreferences,
+};

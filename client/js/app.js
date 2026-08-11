@@ -25,6 +25,7 @@ function renderAuthNav() {
     <a href="/cookbooks.html">Cookbooks</a>
     <a href="/recipes.html">Recettes</a>
     <a href="/data.html">Export / Import</a>
+    <a href="/settings.html">Paramètres</a>
     <span class="nav-user">${escapeHtml(user.name)}</span>
     <a href="#" id="logout-link">Déconnexion</a>
   `;

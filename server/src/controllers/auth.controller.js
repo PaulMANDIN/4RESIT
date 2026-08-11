@@ -115,4 +115,67 @@ function googleConfig(req, res) {
   res.json({ clientId: process.env.GOOGLE_CLIENT_ID || null });
 }
 
-module.exports = { register, login, me, googleAuth, googleConfig, signToken, toPublicUser };
+async function updateProfile(req, res) {
+  try {
+    const data = {};
+    if (req.body.name !== undefined) data.name = req.body.name;
+    if (req.body.avatar !== undefined) data.avatar = req.body.avatar || null;
+
+    const user = await authServices.updateUser(req.user.userId, data);
+    res.json({ user: toPublicUser(user) });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+}
+
+async function changePassword(req, res) {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const user = await authServices.getUserById(req.user.userId);
+
+    // Un compte créé uniquement via OAuth n'a pas de mot de passe : rien à vérifier, on lui en
+    // définit simplement un premier (lui donne un second moyen de se connecter).
+    if (user.passwordHash) {
+      const valid = currentPassword && (await bcrypt.compare(currentPassword, user.passwordHash));
+      if (!valid) {
+        return res.status(401).json({ message: 'Mot de passe actuel incorrect.' });
+      }
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    await authServices.updateUser(user.id, { passwordHash });
+    res.status(204).send();
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+}
+
+async function getPreferences(req, res) {
+  try {
+    const preferences = await authServices.getPreferences(req.user.userId);
+    res.json({ preferences });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+}
+
+async function updatePreferences(req, res) {
+  try {
+    const data = {};
+    const fields = ['diet', 'allergies', 'cuisineTypes', 'defaultPortions'];
+    fields.forEach((field) => {
+      if (req.body[field] !== undefined) data[field] = req.body[field];
+    });
+
+    const preferences = await authServices.updatePreferences(req.user.userId, data);
+    res.json({ preferences });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+}
+
+module.exports = {
+  register, login, me, googleAuth, googleConfig,
+  updateProfile, changePassword, getPreferences, updatePreferences,
+  signToken, toPublicUser,
+};
