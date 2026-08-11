@@ -12,6 +12,7 @@ function renderRecipe(recipe) {
   if (recipe.source) meta.push(`Source : ${escapeHtml(recipe.source)}`);
 
   container.innerHTML = `
+    ${recipe.imageUrl ? `<img src="${escapeHtml(recipe.imageUrl)}" alt="${escapeHtml(recipe.title)}" class="detail-image" />` : ''}
     <div class="detail-header">
       <div>
         <h1>${escapeHtml(recipe.title)}</h1>

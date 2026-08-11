@@ -8,6 +8,7 @@ const {
   requireRecipeCookbookChangeAllowed,
 } = require('../middleware/recipe');
 const { requireCommentAccess } = require('../middleware/comment');
+const recipeImageUpload = require('../middleware/upload');
 const {
   validateRecipeCreate,
   validateRecipeUpdate,
@@ -63,6 +64,15 @@ router.put(
   requireRecipeAccess('EDITOR'),
   requireRecipeCookbookChangeAllowed,
   recipeController.update
+);
+
+router.post(
+  '/:id/image',
+  validateRecipeIdParam,
+  handleValidationErrors,
+  requireRecipeAccess('EDITOR'),
+  recipeImageUpload,
+  recipeController.uploadImage
 );
 
 router.delete(

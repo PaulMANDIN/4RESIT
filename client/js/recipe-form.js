@@ -73,6 +73,12 @@ async function loadCookbookOptions(selectedId) {
   }
 }
 
+function showImagePreview(src) {
+  const preview = document.getElementById('image-preview');
+  preview.src = src;
+  preview.hidden = false;
+}
+
 function fillForm(recipe) {
   document.getElementById('title').value = recipe.title;
   document.getElementById('description').value = recipe.description || '';
@@ -84,6 +90,24 @@ function fillForm(recipe) {
   document.getElementById('tags').value = (recipe.Tags || []).map((t) => t.name).join(', ');
   (recipe.Ingredients || []).forEach(addIngredientRow);
   (recipe.Steps || []).forEach(addStepRow);
+  if (recipe.imageUrl) showImagePreview(recipe.imageUrl);
+}
+
+async function uploadRecipeImage(recipeId, file) {
+  const formData = new FormData();
+  formData.append('image', file);
+  const token = localStorage.getItem('token');
+
+  const res = await fetch(`${API_URL}/recipes/${recipeId}/image`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.message || "Échec de l'upload de l'image.");
+  }
+  return data.imageUrl;
 }
 
 async function initForm() {
@@ -118,6 +142,11 @@ async function initForm() {
   document.getElementById('add-ingredient-btn').addEventListener('click', () => addIngredientRow());
   document.getElementById('add-step-btn').addEventListener('click', () => addStepRow());
 
+  document.getElementById('imageFile').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) showImagePreview(URL.createObjectURL(file));
+  });
+
   document.getElementById('recipe-form').addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -145,6 +174,12 @@ async function initForm() {
       const { recipe } = isEdit
         ? await apiFetch(`/recipes/${id}`, { method: 'PUT', body: JSON.stringify(payload) })
         : await apiFetch('/recipes', { method: 'POST', body: JSON.stringify(payload) });
+
+      const imageFile = document.getElementById('imageFile').files[0];
+      if (imageFile) {
+        await uploadRecipeImage(recipe.id, imageFile);
+      }
+
       window.location.href = `/recipe.html?id=${recipe.id}`;
     } catch (err) {
       showPageError(err.message);

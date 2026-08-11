@@ -107,4 +107,21 @@ async function removeFavorite(req, res) {
   }
 }
 
-module.exports = { create, list, getById, update, remove, addFavorite, removeFavorite };
+async function uploadImage(req, res) {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'Aucun fichier image reçu.' });
+    }
+
+    const imageUrl = `/uploads/${req.file.filename}`;
+    const recipe = await recipeServices.updateRecipeImage(req.params.id, imageUrl);
+    if (!recipe) {
+      return res.status(404).json({ message: 'Recette non trouvée.' });
+    }
+    res.json({ imageUrl });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+}
+
+module.exports = { create, list, getById, update, remove, addFavorite, removeFavorite, uploadImage };

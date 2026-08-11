@@ -316,6 +316,15 @@ main.container {
   color: var(--color-primary);
 }
 
+.card__image {
+  display: block;
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  border-radius: var(--radius);
+  margin-bottom: 0.75rem;
+}
+
 .card__header {
   display: flex;
   align-items: center;
@@ -587,6 +596,24 @@ a.btn {
 }
 
 /* Detail pages */
+.detail-image {
+  display: block;
+  width: 100%;
+  max-height: 320px;
+  object-fit: cover;
+  border-radius: var(--radius);
+  margin-bottom: 1.2rem;
+}
+
+.image-preview {
+  display: block;
+  max-width: 240px;
+  max-height: 180px;
+  object-fit: cover;
+  border-radius: var(--radius);
+  margin: 0.5rem 0 1rem;
+}
+
 .detail-header {
   display: flex;
   justify-content: space-between;

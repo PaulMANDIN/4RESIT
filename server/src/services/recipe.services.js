@@ -1,7 +1,16 @@
+const fs = require('fs');
+const path = require('path');
 const Fuse = require('fuse.js');
 const { Op } = require('sequelize');
 const { Recipe, Ingredient, Step, Tag, User, Cookbook, Favorite } = require('../models');
 const sequelize = require('../config/database');
+
+// Ne supprime que les images uploadées localement (/uploads/...) — jamais une URL externe
+// que l'utilisateur aurait renseignée manuellement dans le champ imageUrl.
+function deleteUploadedFile(imageUrl) {
+  if (!imageUrl || !imageUrl.startsWith('/uploads/')) return;
+  fs.unlink(path.join(__dirname, '..', '..', 'uploads', path.basename(imageUrl)), () => {});
+}
 
 const LIST_INCLUDE = [
   { model: User, as: 'author', attributes: ['id', 'name', 'email', 'avatar'] },
@@ -261,8 +270,21 @@ const recipeServices = {
     });
   },
 
-  deleteRecipe(id) {
-    return Recipe.destroy({ where: { id } });
+  async deleteRecipe(id) {
+    const recipe = await Recipe.findByPk(id);
+    if (!recipe) return 0;
+    const count = await Recipe.destroy({ where: { id } });
+    if (count) deleteUploadedFile(recipe.imageUrl);
+    return count;
+  },
+
+  async updateRecipeImage(id, imageUrl) {
+    const recipe = await Recipe.findByPk(id);
+    if (!recipe) return null;
+    const oldImageUrl = recipe.imageUrl;
+    await recipe.update({ imageUrl });
+    if (oldImageUrl && oldImageUrl !== imageUrl) deleteUploadedFile(oldImageUrl);
+    return recipe;
   },
 
   addFavorite(userId, recipeId) {

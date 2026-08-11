@@ -7,6 +7,7 @@ function recipeCard(recipe) {
   return `
     <div class="card" data-recipe-id="${recipe.id}">
       <a class="card__link" href="/recipe.html?id=${recipe.id}">
+        ${recipe.imageUrl ? `<img src="${escapeHtml(recipe.imageUrl)}" alt="" class="card__image" />` : ''}
         <div class="card__header">
           <h3>${escapeHtml(recipe.title)}</h3>
         </div>
