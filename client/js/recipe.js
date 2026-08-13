@@ -21,6 +21,7 @@ function renderRecipe(recipe) {
       </div>
       <div class="detail-actions">
         <button id="favorite-recipe-btn" class="btn btn--secondary btn--small ${recipe.isFavorite ? 'favorite-btn--active' : ''}">${recipe.isFavorite ? '★ Favori' : '☆ Favori'}</button>
+        <a href="/mealplan.html?recipeId=${recipe.id}" class="btn btn--secondary btn--small">Planifier</a>
         <a href="/recipe-form.html?id=${recipe.id}" class="btn btn--secondary btn--small">Modifier</a>
         <button id="delete-recipe-btn" class="btn btn--danger btn--small">Supprimer</button>
       </div>

@@ -731,6 +731,68 @@ a.btn {
   word-break: break-word;
 }
 
+/* Meal plan */
+.week-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.week-nav__label {
+  font-weight: 600;
+  min-width: 14rem;
+  text-align: center;
+}
+
+.week-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.week-day {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 0.9rem;
+}
+
+.week-day h3 {
+  margin: 0 0 0.6rem;
+  font-size: 0.95rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.week-day__date {
+  font-weight: 400;
+  font-size: 0.8rem;
+  color: var(--color-muted);
+}
+
+.mealplan-entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+  padding: 0.4rem 0;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.85rem;
+}
+
+.mealplan-entry:first-of-type {
+  border-top: none;
+}
+
+.mealplan-entry__type {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--color-muted);
+}
+
 /* Ingredients / steps display */
 .ingredient-list {
   list-style: disc;

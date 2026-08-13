@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Planning des repas — SUPMEAL</title>
+  <link rel="stylesheet" href="/css/main.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="brand" href="/index.html">SUPMEAL</a>
+      <nav class="nav">
+        <a href="/index.html">Accueil</a>
+        <a href="/login.html">Connexion</a>
+        <a href="/register.html">Inscription</a>
+      </nav>
+      <span id="api-status" class="status-badge status-badge--loading">API : vérification…</span>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="page-header">
+      <h1>Planning des repas</h1>
+    </div>
+
+    <p id="page-error" class="alert alert--error" hidden></p>
+
+    <form id="mealplan-form" class="inline-form">
+      <select id="mealplan-recipe" required>
+        <option value="">Choisir une recette…</option>
+      </select>
+      <input type="date" id="mealplan-date" required />
+      <select id="mealplan-type" required>
+        <option value="BREAKFAST">Petit-déjeuner</option>
+        <option value="LUNCH">Déjeuner</option>
+        <option value="DINNER">Dîner</option>
+        <option value="SNACK">Collation</option>
+      </select>
+      <button type="submit" class="btn btn--primary">Ajouter au planning</button>
+    </form>
+
+    <div class="week-nav">
+      <button type="button" id="week-prev" class="btn btn--secondary btn--small">&larr; Semaine précédente</button>
+      <span id="week-label" class="week-nav__label"></span>
+      <button type="button" id="week-next" class="btn btn--secondary btn--small">Semaine suivante &rarr;</button>
+    </div>
+
+    <div id="week-grid" class="week-grid"></div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>SUPMEAL &mdash; Projet SUPINFO M1</p>
+    </div>
+  </footer>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/app.js"></script>
+  <script src="/js/mealplan.js"></script>
+</body>
+</html>
