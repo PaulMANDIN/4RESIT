@@ -59,6 +59,7 @@ function collectTags() {
 
 async function loadCookbookOptions(selectedId) {
   const select = document.getElementById('cookbookId');
+  hidePageError();
   try {
     const { cookbooks } = await apiFetch('/cookbooks');
     cookbooks.forEach((cb) => {
@@ -170,6 +171,7 @@ async function initForm() {
       payload.cookbookId = selectedCookbookId;
     }
 
+    hidePageError();
     try {
       const { recipe } = isEdit
         ? await apiFetch(`/recipes/${id}`, { method: 'PUT', body: JSON.stringify(payload) })

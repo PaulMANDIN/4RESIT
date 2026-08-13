@@ -50,8 +50,17 @@ function parseJson(buffer) {
   } catch {
     throw new Error('Fichier JSON invalide.');
   }
-  const personalRecipes = Array.isArray(data.personalRecipes) ? data.personalRecipes : [];
-  const cookbooks = Array.isArray(data.cookbooks) ? data.cookbooks : [];
+  if (!data || typeof data !== 'object' || Array.isArray(data)) {
+    throw new Error('Fichier invalide : un objet JSON est attendu.');
+  }
+  if (data.personalRecipes !== undefined && !Array.isArray(data.personalRecipes)) {
+    throw new Error('Fichier invalide : "personalRecipes" doit être une liste.');
+  }
+  if (data.cookbooks !== undefined && !Array.isArray(data.cookbooks)) {
+    throw new Error('Fichier invalide : "cookbooks" doit être une liste.');
+  }
+  const personalRecipes = data.personalRecipes || [];
+  const cookbooks = data.cookbooks || [];
 
   personalRecipes.forEach((r) => assertPortableRecipe(r, 'personalRecipes'));
   cookbooks.forEach((cb) => {

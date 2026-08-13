@@ -44,6 +44,7 @@ function formatWeekLabel() {
 
 async function loadRecipeOptions() {
   const select = document.getElementById('mealplan-recipe');
+  hidePageError();
   try {
     const { recipes } = await apiFetch('/recipes');
     recipes.forEach((recipe) => {
@@ -95,6 +96,7 @@ function renderWeek(entries) {
   document.querySelectorAll('.mealplan-remove-btn').forEach((btn) => {
     btn.addEventListener('click', async (e) => {
       const entryId = e.target.closest('.mealplan-entry').dataset.entryId;
+      hidePageError();
       try {
         await apiFetch(`/mealplan/${entryId}`, { method: 'DELETE' });
         await loadWeek();
@@ -106,6 +108,7 @@ function renderWeek(entries) {
 }
 
 async function loadWeek() {
+  hidePageError();
   try {
     const from = toISODate(currentWeekStart);
     const to = toISODate(addDays(currentWeekStart, 6));
@@ -133,6 +136,7 @@ function initMealPlanForm() {
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
+    hidePageError();
     try {
       await apiFetch('/mealplan', {
         method: 'POST',

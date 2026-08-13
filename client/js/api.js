@@ -40,3 +40,9 @@ function showPageError(message) {
   el.textContent = message;
   el.hidden = false;
 }
+
+function hidePageError() {
+  const el = document.getElementById('page-error');
+  if (!el) return;
+  el.hidden = true;
+}

@@ -55,6 +55,7 @@ function buildFilterQuery() {
 
 async function loadCookbookOptions() {
   const select = document.getElementById('filter-cookbook');
+  hidePageError();
   try {
     const { cookbooks } = await apiFetch('/cookbooks');
     cookbooks.forEach((cb) => {
@@ -74,6 +75,7 @@ function initFavoriteButtons() {
       const card = btn.closest('.card');
       const recipeId = card.dataset.recipeId;
       const isActive = btn.classList.contains('favorite-btn--active');
+      hidePageError();
       try {
         await apiFetch(`/recipes/${recipeId}/favorite`, { method: isActive ? 'DELETE' : 'POST' });
         btn.classList.toggle('favorite-btn--active');
@@ -87,6 +89,7 @@ function initFavoriteButtons() {
 
 async function loadRecipes() {
   const list = document.getElementById('recipe-list');
+  hidePageError();
   try {
     const query = buildFilterQuery();
     const { recipes } = await apiFetch(`/recipes${query ? `?${query}` : ''}`);

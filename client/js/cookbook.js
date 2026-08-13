@@ -36,6 +36,7 @@ function renderCookbookDetail(cookbook, myRole) {
   document.getElementById('cancel-edit-btn').addEventListener('click', () => { editForm.hidden = true; });
   editForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+    hidePageError();
     try {
       await apiFetch(`/cookbooks/${cookbook.id}`, {
         method: 'PUT',
@@ -52,6 +53,7 @@ function renderCookbookDetail(cookbook, myRole) {
 
   document.getElementById('delete-cookbook-btn').addEventListener('click', async () => {
     if (!confirm('Supprimer ce cookbook et détacher ses recettes ?')) return;
+    hidePageError();
     try {
       await apiFetch(`/cookbooks/${cookbook.id}`, { method: 'DELETE' });
       window.location.href = '/cookbooks.html';
@@ -88,6 +90,7 @@ function renderMembers(cookbook) {
   list.querySelectorAll('.member-role-select').forEach((select) => {
     select.addEventListener('change', async (e) => {
       const userId = e.target.closest('.member-row').dataset.userId;
+      hidePageError();
       try {
         await apiFetch(`/cookbooks/${cookbook.id}/members/${userId}`, {
           method: 'PUT',
@@ -105,6 +108,7 @@ function renderMembers(cookbook) {
     btn.addEventListener('click', async (e) => {
       const userId = e.target.closest('.member-row').dataset.userId;
       if (!confirm('Retirer ce membre du cookbook ?')) return;
+      hidePageError();
       try {
         await apiFetch(`/cookbooks/${cookbook.id}/members/${userId}`, { method: 'DELETE' });
         loadCookbook();
@@ -136,6 +140,7 @@ function initFavoriteButtons() {
       const card = btn.closest('.card');
       const recipeId = card.dataset.recipeId;
       const isActive = btn.classList.contains('favorite-btn--active');
+      hidePageError();
       try {
         await apiFetch(`/recipes/${recipeId}/favorite`, { method: isActive ? 'DELETE' : 'POST' });
         btn.classList.toggle('favorite-btn--active');
@@ -153,6 +158,7 @@ async function loadCookbookRecipes(cookbookId) {
   if (q) params.set('q', q);
 
   const container = document.getElementById('cookbook-recipes');
+  hidePageError();
   try {
     const { recipes } = await apiFetch(`/recipes?${params.toString()}`);
     container.innerHTML = recipes.length
@@ -186,6 +192,7 @@ async function loadCookbook() {
   const user = requireAuth();
   if (!user) return;
 
+  hidePageError();
   try {
     const { cookbook } = await apiFetch(`/cookbooks/${id}`);
     const myMembership = cookbook.members.find((m) => m.id === user.id);
@@ -213,12 +220,14 @@ function messageBubble(message) {
 
 function appendMessage(message) {
   const container = document.getElementById('chat-messages');
+  container.querySelector('.empty-state')?.remove();
   container.insertAdjacentHTML('beforeend', messageBubble(message));
   container.scrollTop = container.scrollHeight;
 }
 
 async function loadMessageHistory(cookbookId) {
   const container = document.getElementById('chat-messages');
+  hidePageError();
   try {
     const { messages } = await apiFetch(`/cookbooks/${cookbookId}/messages`);
     container.innerHTML = messages.length
@@ -254,6 +263,7 @@ function initChat(cookbookId) {
     const content = input.value.trim();
     if (!content) return;
 
+    hidePageError();
     socket.emit('message:send', { cookbookId, content }, (res) => {
       if (res?.error) {
         showPageError(res.error);
@@ -272,6 +282,7 @@ function initAddMemberForm() {
     const email = document.getElementById('member-email').value.trim();
     const role = document.getElementById('member-role').value;
 
+    hidePageError();
     try {
       await apiFetch(`/cookbooks/${id}/members`, {
         method: 'POST',

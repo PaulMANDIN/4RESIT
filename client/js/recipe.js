@@ -57,6 +57,7 @@ function renderRecipe(recipe) {
 
   document.getElementById('delete-recipe-btn').addEventListener('click', async () => {
     if (!confirm('Supprimer cette recette ?')) return;
+    hidePageError();
     try {
       await apiFetch(`/recipes/${recipe.id}`, { method: 'DELETE' });
       window.location.href = recipe.Cookbook ? `/cookbook.html?id=${recipe.Cookbook.id}` : '/recipes.html';
@@ -68,6 +69,7 @@ function renderRecipe(recipe) {
   document.getElementById('favorite-recipe-btn').addEventListener('click', async (e) => {
     const btn = e.currentTarget;
     const isActive = btn.classList.contains('favorite-btn--active');
+    hidePageError();
     try {
       await apiFetch(`/recipes/${recipe.id}/favorite`, { method: isActive ? 'DELETE' : 'POST' });
       btn.classList.toggle('favorite-btn--active');
@@ -99,6 +101,7 @@ function initCommentDeleteButtons(recipeId) {
     btn.addEventListener('click', async (e) => {
       const commentId = e.target.closest('.comment').dataset.commentId;
       if (!confirm('Supprimer ce commentaire ?')) return;
+      hidePageError();
       try {
         await apiFetch(`/recipes/${recipeId}/comments/${commentId}`, { method: 'DELETE' });
         await loadComments(recipeId);
@@ -111,6 +114,7 @@ function initCommentDeleteButtons(recipeId) {
 
 async function loadComments(recipeId) {
   const list = document.getElementById('comment-list');
+  hidePageError();
   try {
     const { comments } = await apiFetch(`/recipes/${recipeId}/comments`);
     list.innerHTML = comments.length
@@ -131,6 +135,7 @@ function initComments(recipeId) {
     const content = input.value.trim();
     if (!content) return;
 
+    hidePageError();
     try {
       await apiFetch(`/recipes/${recipeId}/comments`, {
         method: 'POST',
@@ -154,6 +159,7 @@ async function loadRecipe() {
   const user = requireAuth();
   if (!user) return;
 
+  hidePageError();
   try {
     const { recipe } = await apiFetch(`/recipes/${id}`);
     renderRecipe(recipe);
