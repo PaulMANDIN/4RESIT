@@ -17,7 +17,7 @@ const validateRecipeCreate = [
     .optional({ checkFalsy: true })
     .isInt({ min: 0 }).withMessage('Le temps de cuisson doit être un entier positif.'),
   body('portions')
-    .optional({ checkFalsy: true })
+    .optional()
     .isInt({ min: 1 }).withMessage('Le nombre de portions doit être un entier positif.'),
   body('source')
     .optional({ checkFalsy: true })
@@ -70,7 +70,7 @@ const validateRecipeUpdate = [
     .optional({ checkFalsy: true })
     .isInt({ min: 0 }).withMessage('Le temps de cuisson doit être un entier positif.'),
   body('portions')
-    .optional({ checkFalsy: true })
+    .optional()
     .isInt({ min: 1 }).withMessage('Le nombre de portions doit être un entier positif.'),
   body('source')
     .optional({ checkFalsy: true })

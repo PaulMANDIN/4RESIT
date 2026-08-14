@@ -219,7 +219,6 @@ main.container {
   margin-bottom: 1rem;
 }
 
-/* Page layout */
 .page-header {
   display: flex;
   align-items: center;
@@ -248,7 +247,6 @@ main.container {
   padding: 1.5rem 0;
 }
 
-/* Alerts */
 .alert {
   border-radius: var(--radius);
   padding: 0.6rem 0.8rem;
@@ -268,7 +266,6 @@ main.container {
   color: var(--color-success);
 }
 
-/* Cards */
 .card-list {
   display: grid;
   gap: 1rem;
@@ -350,7 +347,6 @@ main.container {
   gap: 0.4rem;
 }
 
-/* Badges */
 .badge {
   display: inline-block;
   font-size: 0.75rem;
@@ -381,7 +377,6 @@ main.container {
   margin-top: 0.5rem;
 }
 
-/* Buttons */
 .btn--secondary {
   background: var(--color-surface);
   color: var(--color-text);
@@ -413,7 +408,6 @@ a.btn {
   text-decoration: none;
 }
 
-/* Generic forms */
 .form {
   display: flex;
   flex-direction: column;
@@ -474,7 +468,6 @@ a.btn {
   font-family: var(--font);
 }
 
-/* Filter / search bar */
 .filter-bar {
   display: flex;
   flex-wrap: wrap;
@@ -535,7 +528,6 @@ a.btn {
   margin-left: auto;
 }
 
-/* Dynamic rows (ingredients / steps) */
 .dynamic-list {
   display: flex;
   flex-direction: column;
@@ -595,7 +587,6 @@ a.btn {
   color: var(--color-primary);
 }
 
-/* Detail pages */
 .detail-image {
   display: block;
   width: 100%;
@@ -635,7 +626,6 @@ a.btn {
   flex-shrink: 0;
 }
 
-/* Members */
 .member-list {
   list-style: none;
   padding: 0;
@@ -670,7 +660,6 @@ a.btn {
   gap: 0.5rem;
 }
 
-/* Chat */
 .chat-messages {
   display: flex;
   flex-direction: column;
@@ -700,7 +689,6 @@ a.btn {
   word-break: break-word;
 }
 
-/* Comments */
 .comment-list {
   display: flex;
   flex-direction: column;
@@ -731,7 +719,6 @@ a.btn {
   word-break: break-word;
 }
 
-/* Meal plan */
 .week-nav {
   display: flex;
   align-items: center;
@@ -793,7 +780,6 @@ a.btn {
   color: var(--color-muted);
 }
 
-/* Ingredients / steps display */
 .ingredient-list {
   list-style: disc;
   padding-left: 1.4rem;

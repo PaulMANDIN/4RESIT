@@ -5,8 +5,6 @@ const { Op } = require('sequelize');
 const { Recipe, Ingredient, Step, Tag, User, Cookbook, Favorite } = require('../models');
 const sequelize = require('../config/database');
 
-// Ne supprime que les images uploadées localement (/uploads/...) — jamais une URL externe
-// que l'utilisateur aurait renseignée manuellement dans le champ imageUrl.
 function deleteUploadedFile(imageUrl) {
   if (!imageUrl || !imageUrl.startsWith('/uploads/')) return;
   fs.unlink(path.join(__dirname, '..', '..', 'uploads', path.basename(imageUrl)), () => {});
@@ -18,8 +16,6 @@ const LIST_INCLUDE = [
   { model: Tag, attributes: ['id', 'name'], through: { attributes: [] } },
 ];
 
-// Champs sur lesquels la recherche floue (q) peut porter — cf. décision produit :
-// pas de recherche sur description/étapes, uniquement titre/tags/ingrédients.
 const SEARCH_FIELD_CONFIG = {
   title: { fuseKey: 'title' },
   tags: { fuseKey: 'Tags.name' },
@@ -49,8 +45,6 @@ function normalizeTagName(name) {
   return name.trim().toLowerCase();
 }
 
-// Normalisé en amont pour éviter que "Dessert" et "dessert" deviennent deux tags distincts
-// (ce qui cassait ensuite le filtre "doit avoir TOUS ces tags", cf. filterIdsByAllTags).
 async function setTagsByName(recipe, tagNames, transaction) {
   const tags = await Promise.all(
     tagNames.map((name) => {
@@ -80,9 +74,6 @@ async function attachFavoriteFlag(recipes, userId) {
   return recipes;
 }
 
-// Filtre structuré "doit avoir TOUS ces tags", par intersection successive. Les noms sont
-// normalisés (cf. normalizeTagName) pour matcher le stockage, quelle que soit la casse tapée
-// par l'utilisateur dans la barre de filtres.
 async function filterIdsByAllTags(baseIds, tagNames) {
   if (!tagNames.length) return baseIds;
   if (!baseIds.length) return [];
@@ -109,7 +100,6 @@ async function filterIdsByAllTags(baseIds, tagNames) {
     .map(([id]) => id);
 }
 
-// Filtre structuré "doit contenir TOUS ces ingrédients" (par nom partiel), par intersection successive.
 async function filterIdsByAllIngredients(baseIds, terms) {
   if (!terms.length) return baseIds;
   let ids = baseIds;
@@ -128,10 +118,6 @@ async function filterIdsByAllIngredients(baseIds, terms) {
   return ids;
 }
 
-// Classement flou par Fuse.js sur les champs sélectionnés (titre/tags/ingrédients), directement
-// sur les recettes déjà réduites par les filtres structurés (baseIds) : pas de préfiltre SQL ILIKE
-// ici, car ce préfiltre est à ordre strict et casserait la tolérance aux fautes de frappe/transpositions
-// que Fuse.js est censé apporter (ex: "puolet" ne matche jamais "poulet" via un pattern %p%u%o%l%e%t%).
 async function rankByQuery(baseIds, q, searchFields) {
   if (!baseIds.length) return [];
 
@@ -141,9 +127,6 @@ async function rankByQuery(baseIds, q, searchFields) {
     include: needsIngredients ? [...LIST_INCLUDE, { model: Ingredient }] : LIST_INCLUDE,
   });
 
-  // threshold 0.35 : tolère une faute de frappe/transposition (ex: "puolet" -> "poulet") sans
-  // faire remonter des recettes sans rapport (0.7, repris tel quel de 4Proj, était trop permissif
-  // ici ; testé en local avec fuse.js sur des cas réels avant de fixer cette valeur).
   const keys = searchFields.map((field) => SEARCH_FIELD_CONFIG[field].fuseKey);
   const fuse = new Fuse(recipes, { keys, threshold: 0.35, ignoreLocation: true });
   return fuse.search(q).map((r) => r.item);
@@ -200,7 +183,6 @@ const recipeServices = {
     return recipe;
   },
 
-  // Filtrage (cookbook, tags, ingrédients, temps, favoris) + recherche floue (titre/tags/ingrédients).
   async searchRecipesForUser(userId, filters = {}) {
     const { q, searchIn, cookbookId, tags, ingredients, maxPrepTime, maxCookTime, favorite } = filters;
 

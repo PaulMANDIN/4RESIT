@@ -64,9 +64,6 @@ async function me(req, res) {
   }
 }
 
-// Le front envoie le idToken obtenu via Google Identity Services (bouton "Sign in with Google").
-// Vérifié ici via google-auth-library : audience = notre GOOGLE_CLIENT_ID, signature vérifiée
-// contre les clés publiques Google. Aucune redirection, pas de client secret nécessaire pour ce flow.
 async function googleAuth(req, res) {
   if (!googleClient) {
     return res.status(501).json({ message: "Connexion Google non configurée pour l'instant." });
@@ -83,15 +80,10 @@ async function googleAuth(req, res) {
       return res.status(401).json({ message: 'Email Google non vérifié.' });
     }
 
-    // Normalisé en minuscules comme register/login (validateRegister/validateLogin le font via
-    // le sanitizer .toLowerCase()) : sans ça, un email Google à la casse différente ne matcherait
-    // pas un compte existant et créerait un doublon.
     const email = payload.email.toLowerCase();
     let user = await authServices.getUserByOAuthAccount('google', payload.sub);
 
     if (!user) {
-      // Email Google déjà vérifié par Google lui-même : on peut relier en confiance à un compte
-      // existant créé par email/mot de passe avec la même adresse, plutôt que de dupliquer l'utilisateur.
       user = await authServices.getUserByEmail(email);
       if (!user) {
         user = await authServices.createUser({
@@ -133,8 +125,6 @@ async function changePassword(req, res) {
     const { currentPassword, newPassword } = req.body;
     const user = await authServices.getUserById(req.user.userId);
 
-    // Un compte créé uniquement via OAuth n'a pas de mot de passe : rien à vérifier, on lui en
-    // définit simplement un premier (lui donne un second moyen de se connecter).
     if (user.passwordHash) {
       const valid = currentPassword && (await bcrypt.compare(currentPassword, user.passwordHash));
       if (!valid) {

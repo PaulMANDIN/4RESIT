@@ -2,8 +2,6 @@ const { Recipe, MealPlan } = require('../models');
 const cookbookServices = require('../services/cookbook.services');
 const { ROLE_RANK } = require('./cookbook');
 
-// Même règle d'accès que requireRecipeAccess (recipe.js), mais sur req.body.recipeId
-// plutôt que req.params.id : la planification se crée en visant une recette par id de body.
 async function requireMealPlanRecipeAccess(req, res, next) {
   try {
     const recipe = await Recipe.findByPk(req.body.recipeId);
@@ -29,8 +27,6 @@ async function requireMealPlanRecipeAccess(req, res, next) {
   }
 }
 
-// La planification est strictement personnelle (MealPlan.userId) : pas de rôle cookbook à vérifier,
-// seul le propriétaire de l'entrée peut la supprimer.
 async function requireOwnMealPlanEntry(req, res, next) {
   try {
     const entry = await MealPlan.findByPk(req.params.id);

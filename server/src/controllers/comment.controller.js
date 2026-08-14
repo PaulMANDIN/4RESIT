@@ -26,7 +26,7 @@ async function create(req, res) {
 async function remove(req, res) {
   try {
     const comment = await commentServices.getCommentById(req.params.commentId);
-    if (!comment) {
+    if (!comment || comment.recipeId !== req.params.id) {
       return res.status(404).json({ message: 'Commentaire non trouvé.' });
     }
 

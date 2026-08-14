@@ -1,11 +1,6 @@
 const { parse: parseCsvSync } = require('csv-parse/sync');
 const { stringify: stringifyCsvSync } = require('csv-stringify/sync');
 
-// Représentation intermédiaire partagée par tous les formats :
-// { personalRecipes: [PortableRecipe], cookbooks: [{ name, description, recipes: [PortableRecipe] }] }
-// PortableRecipe: { title, description, prepTime, cookTime, portions, source, imageUrl,
-//                    tags: [string], ingredients: [{name,quantity,unit}], steps: [{description}] }
-
 function toPortableRecipe(recipe) {
   return {
     title: recipe.title,
@@ -32,8 +27,6 @@ function assertPortableRecipe(recipe, context) {
     throw new Error(`Fichier invalide : une recette de ${context} n'a pas de titre.`);
   }
 }
-
-// ---- JSON ----
 
 function serializeJson(data) {
   return {
@@ -97,11 +90,6 @@ function normalizePortableRecipe(r) {
   };
 }
 
-// ---- CSV ----
-// Une ligne par recette. `cookbook` vide = recette personnelle. Les champs imbriqués
-// (tags/ingredients/steps) sont encodés en JSON dans leur cellule : ça reste du texte brut
-// lisible (pas de binaire/encodage), et c'est la seule façon fiable de conserver des listes
-// structurées dans un format intrinsèquement plat comme le CSV.
 const CSV_COLUMNS = [
   'cookbook', 'cookbookDescription', 'title', 'description', 'prepTime', 'cookTime',
   'portions', 'source', 'imageUrl', 'tags', 'ingredients', 'steps',
@@ -186,12 +174,6 @@ function parseJsonCell(value, fallback) {
   }
 }
 
-// ---- Mealie (format inspiré du schéma de recette Mealie) ----
-// Simplification assumée : recipeIngredient est une liste de chaînes "quantité unité nom"
-// (comme les imports texte-brut de Mealie), pas les objets structurés {quantity,unit,food}
-// de son API v1 — la reconstruction qty/unit/nom au réimport est donc heuristique. `cookbook`
-// est une extension à nous (Mealie n'a pas cette notion) pour préserver le regroupement au
-// réimport ; ignorée par tout lecteur Mealie strict.
 const KNOWN_UNITS = new Set([
   'g', 'kg', 'mg', 'ml', 'cl', 'l', 'cup', 'cups', 'tbsp', 'tsp', 'oz', 'lb',
   'pincée', 'pincees', 'tranche', 'tranches', 'gousse', 'gousses', 'c.à.s', 'c.à.c', 'unité', 'unités',

@@ -2,8 +2,6 @@ const { Recipe } = require('../models');
 const cookbookServices = require('../services/cookbook.services');
 const { ROLE_RANK } = require('./cookbook');
 
-// Les commentaires n'existent que sur des recettes rattachées à un cookbook partagé
-// (une recette perso n'a qu'un seul propriétaire, pas de collaborateurs à qui répondre).
 function requireCommentAccess(minRole) {
   return async (req, res, next) => {
     try {

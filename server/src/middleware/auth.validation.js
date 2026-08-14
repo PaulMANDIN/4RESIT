@@ -58,9 +58,6 @@ const validateUpdatePreferences = [
       .notEmpty().withMessage('Les valeurs ne peuvent pas être vides.')
       .isLength({ max: 50 }).withMessage('Chaque valeur ne peut pas dépasser 50 caractères.'),
   ]),
-  // Pas de checkFalsy ici : contrairement à prepTime/cookTime (min: 0, où 0 est une valeur
-  // valide), defaultPortions a min: 1 — avec checkFalsy, la valeur 0 (falsy) aurait été traitée
-  // comme "absente" et aurait échappé à la validation isInt au lieu d'être rejetée.
   body('defaultPortions')
     .optional()
     .isInt({ min: 1 }).withMessage('Le nombre de portions par défaut doit être un entier positif.'),

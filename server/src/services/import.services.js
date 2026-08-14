@@ -19,11 +19,6 @@ function recipePayload(portable, { cookbookId, createdById }) {
   };
 }
 
-// Chaque recette/cookbook est créé dans sa propre transaction (via recipeServices/cookbookServices) plutôt
-// que dans une seule transaction englobante : la base ne fonctionne pas en CLS ici, donc les imbriquer
-// demanderait de faire circuler explicitement le contexte de transaction dans tout recipeServices pour un
-// gain marginal — le fichier est de toute façon entièrement validé/parsé (recipeFormats) avant la première
-// écriture, donc les seuls échecs possibles à ce stade sont des erreurs DB exceptionnelles.
 async function importData(userId, format, buffer) {
   const data = formats[format].parse(buffer);
 
