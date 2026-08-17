@@ -27,10 +27,13 @@
     <p id="page-error" class="alert alert--error" hidden></p>
 
     <form id="mealplan-form" class="inline-form">
+      <label class="visually-hidden" for="mealplan-recipe">Recette</label>
       <select id="mealplan-recipe" required>
         <option value="">Choisir une recette…</option>
       </select>
+      <label class="visually-hidden" for="mealplan-date">Date</label>
       <input type="date" id="mealplan-date" required />
+      <label class="visually-hidden" for="mealplan-type">Type de repas</label>
       <select id="mealplan-type" required>
         <option value="BREAKFAST">Petit-déjeuner</option>
         <option value="LUNCH">Déjeuner</option>

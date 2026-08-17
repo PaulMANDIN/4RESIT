@@ -36,7 +36,9 @@ function renderCookbookDetail(cookbook, myRole) {
   document.getElementById('cancel-edit-btn').addEventListener('click', () => { editForm.hidden = true; });
   editForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+    const submitBtn = editForm.querySelector('button[type="submit"]');
     hidePageError();
+    submitBtn.disabled = true;
     try {
       await apiFetch(`/cookbooks/${cookbook.id}`, {
         method: 'PUT',
@@ -48,6 +50,7 @@ function renderCookbookDetail(cookbook, myRole) {
       loadCookbook();
     } catch (err) {
       showPageError(err.message);
+      submitBtn.disabled = false;
     }
   });
 
@@ -254,6 +257,11 @@ function initChat(cookbookId) {
   });
 
   socket.on('connect_error', (err) => {
+    if (err.message === 'Token invalide ou expiré.' || err.message === 'Authentification requise.') {
+      localStorage.removeItem('token');
+      window.location.href = '/login.html';
+      return;
+    }
     showPageError(err.message);
   });
 
@@ -278,11 +286,13 @@ function initAddMemberForm() {
   const form = document.getElementById('add-member-form');
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
+    const submitBtn = form.querySelector('button[type="submit"]');
     const id = getCookbookIdFromUrl();
     const email = document.getElementById('member-email').value.trim();
     const role = document.getElementById('member-role').value;
 
     hidePageError();
+    submitBtn.disabled = true;
     try {
       await apiFetch(`/cookbooks/${id}/members`, {
         method: 'POST',
@@ -292,17 +302,19 @@ function initAddMemberForm() {
       loadCookbook();
     } catch (err) {
       showPageError(err.message);
+    } finally {
+      submitBtn.disabled = false;
     }
   });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   if (!requireAuth()) return;
   initAddMemberForm();
   const id = getCookbookIdFromUrl();
   if (id) {
     initCookbookSearchForm(id);
-    loadMessageHistory(id);
+    await loadMessageHistory(id);
     initChat(id);
   }
   loadCookbook();

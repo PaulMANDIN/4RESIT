@@ -6,9 +6,9 @@ function renderRecipe(recipe) {
   const container = document.getElementById('recipe-detail');
   const meta = [];
   if (recipe.Cookbook) meta.push(`Cookbook : <a href="/cookbook.html?id=${recipe.Cookbook.id}">${escapeHtml(recipe.Cookbook.name)}</a>`);
-  if (recipe.prepTime) meta.push(`Préparation : ${recipe.prepTime} min`);
-  if (recipe.cookTime) meta.push(`Cuisson : ${recipe.cookTime} min`);
-  if (recipe.portions) meta.push(`${recipe.portions} portions`);
+  if (recipe.prepTime) meta.push(`Préparation : ${escapeHtml(String(recipe.prepTime))} min`);
+  if (recipe.cookTime) meta.push(`Cuisson : ${escapeHtml(String(recipe.cookTime))} min`);
+  if (recipe.portions) meta.push(`${escapeHtml(String(recipe.portions))} portions`);
   if (recipe.source) meta.push(`Source : ${escapeHtml(recipe.source)}`);
 
   container.innerHTML = `
@@ -131,11 +131,14 @@ function initComments(recipeId) {
 
   document.getElementById('comment-form').addEventListener('submit', async (e) => {
     e.preventDefault();
+    const form = e.target;
+    const submitBtn = form.querySelector('button[type="submit"]');
     const input = document.getElementById('comment-content');
     const content = input.value.trim();
     if (!content) return;
 
     hidePageError();
+    submitBtn.disabled = true;
     try {
       await apiFetch(`/recipes/${recipeId}/comments`, {
         method: 'POST',
@@ -145,6 +148,8 @@ function initComments(recipeId) {
       await loadComments(recipeId);
     } catch (err) {
       showPageError(err.message);
+    } finally {
+      submitBtn.disabled = false;
     }
   });
 }

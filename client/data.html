@@ -34,6 +34,7 @@
         ne le partage qu'avec des personnes de confiance.
       </p>
       <form id="export-form" class="inline-form">
+        <label class="visually-hidden" for="export-format">Format d'export</label>
         <select id="export-format">
           <option value="json">JSON</option>
           <option value="csv">CSV</option>
@@ -51,11 +52,13 @@
       </p>
       <p id="import-success" class="alert alert--success" hidden></p>
       <form id="import-form" class="inline-form">
+        <label class="visually-hidden" for="import-format">Format d'import</label>
         <select id="import-format">
           <option value="json">JSON</option>
           <option value="csv">CSV</option>
           <option value="mealie">Mealie (JSON)</option>
         </select>
+        <label class="visually-hidden" for="import-file">Fichier à importer</label>
         <input type="file" id="import-file" accept=".json,.csv,application/json,text/csv" required />
         <button type="submit" class="btn btn--primary btn--small">Importer</button>
       </form>

@@ -10,6 +10,12 @@ async function apiFetch(path, options = {}) {
     },
     ...options,
   });
+  if (res.status === 401 && token) {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = '/login.html';
+    return new Promise(() => {});
+  }
   if (!res.ok) {
     const err = await res.json().catch(() => ({ message: res.statusText }));
     throw new Error(err.message || 'API error');

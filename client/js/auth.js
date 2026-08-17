@@ -40,9 +40,11 @@ function initLoginForm() {
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
+    const submitBtn = form.querySelector('button[type="submit"]');
     const email = form.email.value.trim();
     const password = form.password.value;
 
+    submitBtn.disabled = true;
     try {
       const { token, user } = await apiFetch('/auth/login', {
         method: 'POST',
@@ -52,6 +54,7 @@ function initLoginForm() {
       window.location.href = '/index.html';
     } catch (err) {
       showFormError(err.message);
+      submitBtn.disabled = false;
     }
   });
 }
@@ -62,6 +65,7 @@ function initRegisterForm() {
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
+    const submitBtn = form.querySelector('button[type="submit"]');
     const name = form.name.value.trim();
     const email = form.email.value.trim();
     const password = form.password.value;
@@ -72,6 +76,7 @@ function initRegisterForm() {
       return;
     }
 
+    submitBtn.disabled = true;
     try {
       const { token, user } = await apiFetch('/auth/register', {
         method: 'POST',
@@ -81,6 +86,7 @@ function initRegisterForm() {
       window.location.href = '/index.html';
     } catch (err) {
       showFormError(err.message);
+      submitBtn.disabled = false;
     }
   });
 }

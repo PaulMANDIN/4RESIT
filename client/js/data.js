@@ -72,7 +72,7 @@ async function handleImportSubmit(e) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  requireAuth();
+  if (!requireAuth()) return;
   document.getElementById('export-form').addEventListener('submit', handleExportSubmit);
   document.getElementById('import-form').addEventListener('submit', handleImportSubmit);
 });

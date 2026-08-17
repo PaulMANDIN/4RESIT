@@ -27,9 +27,12 @@ function initCreateCookbookForm() {
   const form = document.getElementById('create-cookbook-form');
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
+    const submitBtn = form.querySelector('button[type="submit"]');
     const name = document.getElementById('cookbook-name').value.trim();
     const description = document.getElementById('cookbook-description').value.trim();
 
+    hidePageError();
+    submitBtn.disabled = true;
     try {
       await apiFetch('/cookbooks', {
         method: 'POST',
@@ -39,6 +42,8 @@ function initCreateCookbookForm() {
       loadCookbooks();
     } catch (err) {
       showPageError(err.message);
+    } finally {
+      submitBtn.disabled = false;
     }
   });
 }

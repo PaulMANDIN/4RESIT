@@ -28,6 +28,7 @@
     <p id="page-error" class="alert alert--error" hidden></p>
 
     <form id="filter-form" class="filter-bar">
+      <label class="visually-hidden" for="filter-q">Rechercher</label>
       <input type="search" id="filter-q" placeholder="Rechercher…" />
       <fieldset class="filter-bar__checkboxes">
         <legend>Rechercher dans</legend>
@@ -35,10 +36,13 @@
         <label><input type="checkbox" id="filter-search-tags" checked /> Tags</label>
         <label><input type="checkbox" id="filter-search-ingredients" checked /> Ingrédients</label>
       </fieldset>
+      <label class="visually-hidden" for="filter-cookbook">Cookbook</label>
       <select id="filter-cookbook">
         <option value="">Tous les cookbooks</option>
       </select>
+      <label class="visually-hidden" for="filter-tags">Tags</label>
       <input type="text" id="filter-tags" placeholder="Tags (séparés par virgule)" />
+      <label class="visually-hidden" for="filter-ingredients">Ingrédients</label>
       <input type="text" id="filter-ingredients" placeholder="Ingrédients (séparés par virgule)" />
       <label>Prépa max (min) <input type="number" id="filter-max-prep" min="0" /></label>
       <label>Cuisson max (min) <input type="number" id="filter-max-cook" min="0" /></label>

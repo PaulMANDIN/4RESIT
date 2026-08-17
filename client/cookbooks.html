@@ -27,7 +27,9 @@
     <p id="page-error" class="alert alert--error" hidden></p>
 
     <form id="create-cookbook-form" class="inline-form">
+      <label class="visually-hidden" for="cookbook-name">Nom du cookbook</label>
       <input type="text" id="cookbook-name" placeholder="Nom du cookbook" required maxlength="100" />
+      <label class="visually-hidden" for="cookbook-description">Description</label>
       <input type="text" id="cookbook-description" placeholder="Description (optionnel)" maxlength="2000" />
       <button type="submit" class="btn btn--primary">Créer</button>
     </form>

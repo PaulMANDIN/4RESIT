@@ -7,7 +7,7 @@ function ingredientRow(ing = {}) {
   row.className = 'dynamic-row';
   row.innerHTML = `
     <input type="text" class="ingredient-name" placeholder="Nom" value="${escapeHtml(ing.name || '')}" required />
-    <input type="number" class="ingredient-qty" placeholder="Qté" min="0" step="any" value="${ing.quantity ?? ''}" />
+    <input type="number" class="ingredient-qty" placeholder="Qté" min="0" step="any" value="${escapeHtml(String(ing.quantity ?? ''))}" />
     <input type="text" class="ingredient-unit" placeholder="Unité" value="${escapeHtml(ing.unit || '')}" />
     <button type="button" class="icon-btn remove-row-btn" title="Retirer">&times;</button>
   `;
@@ -74,10 +74,18 @@ async function loadCookbookOptions(selectedId) {
   }
 }
 
+let previewObjectUrl = null;
+
 function showImagePreview(src) {
   const preview = document.getElementById('image-preview');
   preview.src = src;
   preview.hidden = false;
+}
+
+function showImagePreviewFromFile(file) {
+  if (previewObjectUrl) URL.revokeObjectURL(previewObjectUrl);
+  previewObjectUrl = URL.createObjectURL(file);
+  showImagePreview(previewObjectUrl);
 }
 
 function fillForm(recipe) {
@@ -115,9 +123,9 @@ async function initForm() {
   const user = requireAuth();
   if (!user) return;
 
-  const id = getQueryParam('id');
+  let id = getQueryParam('id');
   const cookbookIdParam = getQueryParam('cookbookId');
-  const isEdit = Boolean(id);
+  let isEdit = Boolean(id);
 
   document.getElementById('form-title').textContent = isEdit ? 'Modifier la recette' : 'Nouvelle recette';
 
@@ -145,11 +153,13 @@ async function initForm() {
 
   document.getElementById('imageFile').addEventListener('change', (e) => {
     const file = e.target.files[0];
-    if (file) showImagePreview(URL.createObjectURL(file));
+    if (file) showImagePreviewFromFile(file);
   });
 
   document.getElementById('recipe-form').addEventListener('submit', async (e) => {
     e.preventDefault();
+
+    const submitBtn = document.getElementById('recipe-form').querySelector('button[type="submit"]');
 
     const payload = {
       title: document.getElementById('title').value.trim(),
@@ -172,19 +182,33 @@ async function initForm() {
     }
 
     hidePageError();
+    submitBtn.disabled = true;
     try {
       const { recipe } = isEdit
         ? await apiFetch(`/recipes/${id}`, { method: 'PUT', body: JSON.stringify(payload) })
         : await apiFetch('/recipes', { method: 'POST', body: JSON.stringify(payload) });
 
+      // La recette existe désormais côté serveur : toute nouvelle soumission
+      // (ex. après un échec d'upload d'image) doit la modifier, jamais la recréer.
+      id = recipe.id;
+      isEdit = true;
+      existingRecipe = recipe;
+
       const imageFile = document.getElementById('imageFile').files[0];
       if (imageFile) {
-        await uploadRecipeImage(recipe.id, imageFile);
+        try {
+          await uploadRecipeImage(recipe.id, imageFile);
+        } catch (imgErr) {
+          showPageError(`Recette enregistrée, mais l'upload de l'image a échoué : ${imgErr.message}`);
+          submitBtn.disabled = false;
+          return;
+        }
       }
 
       window.location.href = `/recipe.html?id=${recipe.id}`;
     } catch (err) {
       showPageError(err.message);
+      submitBtn.disabled = false;
     }
   });
 }

@@ -136,7 +136,9 @@ function initMealPlanForm() {
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
+    const submitBtn = form.querySelector('button[type="submit"]');
     hidePageError();
+    submitBtn.disabled = true;
     try {
       await apiFetch('/mealplan', {
         method: 'POST',
@@ -150,6 +152,8 @@ function initMealPlanForm() {
       await loadWeek();
     } catch (err) {
       showPageError(err.message);
+    } finally {
+      submitBtn.disabled = false;
     }
   });
 }

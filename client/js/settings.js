@@ -25,9 +25,12 @@ async function loadProfile() {
 }
 
 function initProfileForm() {
-  document.getElementById('profile-form').addEventListener('submit', async (e) => {
+  const form = document.getElementById('profile-form');
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
+    const submitBtn = form.querySelector('button[type="submit"]');
     hideMessages();
+    submitBtn.disabled = true;
 
     try {
       const { user } = await apiFetch('/auth/me', {
@@ -41,6 +44,8 @@ function initProfileForm() {
       showPageSuccess('Profil mis à jour.');
     } catch (err) {
       showPageError(err.message);
+    } finally {
+      submitBtn.disabled = false;
     }
   });
 }
@@ -49,6 +54,7 @@ function initPasswordForm() {
   const form = document.getElementById('password-form');
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
+    const submitBtn = form.querySelector('button[type="submit"]');
     hideMessages();
 
     const newPassword = document.getElementById('new-password').value;
@@ -58,6 +64,7 @@ function initPasswordForm() {
       return;
     }
 
+    submitBtn.disabled = true;
     try {
       await apiFetch('/auth/me/password', {
         method: 'PUT',
@@ -70,6 +77,8 @@ function initPasswordForm() {
       showPageSuccess('Mot de passe changé.');
     } catch (err) {
       showPageError(err.message);
+    } finally {
+      submitBtn.disabled = false;
     }
   });
 }
@@ -87,12 +96,15 @@ async function loadPreferences() {
 }
 
 function initPreferencesForm() {
-  document.getElementById('preferences-form').addEventListener('submit', async (e) => {
+  const form = document.getElementById('preferences-form');
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
+    const submitBtn = form.querySelector('button[type="submit"]');
     hideMessages();
 
     const defaultPortions = document.getElementById('pref-default-portions').value;
 
+    submitBtn.disabled = true;
     try {
       await apiFetch('/auth/me/preferences', {
         method: 'PUT',
@@ -106,6 +118,8 @@ function initPreferencesForm() {
       showPageSuccess('Préférences enregistrées.');
     } catch (err) {
       showPageError(err.message);
+    } finally {
+      submitBtn.disabled = false;
     }
   });
 }

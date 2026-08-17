@@ -1,8 +1,8 @@
 function recipeCard(recipe) {
   const meta = [];
   if (recipe.Cookbook) meta.push(`<span class="badge">${escapeHtml(recipe.Cookbook.name)}</span>`);
-  if (recipe.prepTime) meta.push(`<span class="badge">${recipe.prepTime} min prépa</span>`);
-  if (recipe.portions) meta.push(`<span class="badge">${recipe.portions} portions</span>`);
+  if (recipe.prepTime) meta.push(`<span class="badge">${escapeHtml(String(recipe.prepTime))} min prépa</span>`);
+  if (recipe.portions) meta.push(`<span class="badge">${escapeHtml(String(recipe.portions))} portions</span>`);
 
   return `
     <div class="card" data-recipe-id="${recipe.id}">
@@ -78,8 +78,15 @@ function initFavoriteButtons() {
       hidePageError();
       try {
         await apiFetch(`/recipes/${recipeId}/favorite`, { method: isActive ? 'DELETE' : 'POST' });
-        btn.classList.toggle('favorite-btn--active');
-        btn.textContent = isActive ? '☆' : '★';
+        const favoriteOnly = document.getElementById('filter-favorite').checked;
+        if (favoriteOnly && isActive) {
+          card.remove();
+          const list = document.getElementById('recipe-list');
+          if (!list.children.length) list.innerHTML = '<p class="empty-state">Aucune recette pour le moment.</p>';
+        } else {
+          btn.classList.toggle('favorite-btn--active');
+          btn.textContent = isActive ? '☆' : '★';
+        }
       } catch (err) {
         showPageError(err.message);
       }
