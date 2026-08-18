@@ -1,4 +1,4 @@
-const { formats } = require('./recipeFormats');
+const { formats, validateImportData } = require('./recipeFormats');
 const recipeServices = require('./recipe.services');
 const cookbookServices = require('./cookbook.services');
 
@@ -20,7 +20,7 @@ function recipePayload(portable, { cookbookId, createdById }) {
 }
 
 async function importData(userId, format, buffer) {
-  const data = formats[format].parse(buffer);
+  const data = validateImportData(formats[format].parse(buffer));
 
   let recipesCreated = 0;
   let cookbooksCreated = 0;

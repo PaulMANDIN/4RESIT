@@ -1,6 +1,6 @@
 const { Recipe, MealPlan } = require('../models');
 const cookbookServices = require('../services/cookbook.services');
-const { ROLE_RANK } = require('./cookbook');
+const { hasSufficientRole } = require('./cookbook');
 
 async function requireMealPlanRecipeAccess(req, res, next) {
   try {
@@ -17,7 +17,7 @@ async function requireMealPlanRecipeAccess(req, res, next) {
     }
 
     const membership = await cookbookServices.getMembership(recipe.cookbookId, req.user.userId);
-    if (!membership || ROLE_RANK[membership.role] < ROLE_RANK.READER) {
+    if (!hasSufficientRole(membership, 'READER')) {
       return res.status(403).json({ message: "Vous n'avez pas accès à cette recette." });
     }
 

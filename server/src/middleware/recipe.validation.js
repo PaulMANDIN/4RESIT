@@ -11,10 +11,10 @@ const validateRecipeCreate = [
     .optional({ checkFalsy: true })
     .isLength({ max: 5000 }).withMessage('La description ne peut pas dépasser 5000 caractères.'),
   body('prepTime')
-    .optional({ checkFalsy: true })
+    .optional()
     .isInt({ min: 0 }).withMessage('Le temps de préparation doit être un entier positif.'),
   body('cookTime')
-    .optional({ checkFalsy: true })
+    .optional()
     .isInt({ min: 0 }).withMessage('Le temps de cuisson doit être un entier positif.'),
   body('portions')
     .optional()
@@ -35,7 +35,7 @@ const validateRecipeCreate = [
     .trim()
     .notEmpty().withMessage("Le nom de l'ingrédient est obligatoire."),
   body('ingredients.*.quantity')
-    .optional({ checkFalsy: true })
+    .optional()
     .isFloat({ min: 0 }).withMessage('La quantité doit être un nombre positif.'),
   body('ingredients.*.unit')
     .optional({ checkFalsy: true })
@@ -64,10 +64,10 @@ const validateRecipeUpdate = [
     .optional({ checkFalsy: true })
     .isLength({ max: 5000 }).withMessage('La description ne peut pas dépasser 5000 caractères.'),
   body('prepTime')
-    .optional({ checkFalsy: true })
+    .optional()
     .isInt({ min: 0 }).withMessage('Le temps de préparation doit être un entier positif.'),
   body('cookTime')
-    .optional({ checkFalsy: true })
+    .optional()
     .isInt({ min: 0 }).withMessage('Le temps de cuisson doit être un entier positif.'),
   body('portions')
     .optional()
@@ -88,7 +88,7 @@ const validateRecipeUpdate = [
     .trim()
     .notEmpty().withMessage("Le nom de l'ingrédient est obligatoire."),
   body('ingredients.*.quantity')
-    .optional({ checkFalsy: true })
+    .optional()
     .isFloat({ min: 0 }).withMessage('La quantité doit être un nombre positif.'),
   body('ingredients.*.unit')
     .optional({ checkFalsy: true })
@@ -135,10 +135,10 @@ const validateRecipeQuery = [
     .optional({ checkFalsy: true })
     .isString(),
   query('maxPrepTime')
-    .optional({ checkFalsy: true })
+    .optional()
     .isInt({ min: 0 }).withMessage('maxPrepTime doit être un entier positif.'),
   query('maxCookTime')
-    .optional({ checkFalsy: true })
+    .optional()
     .isInt({ min: 0 }).withMessage('maxCookTime doit être un entier positif.'),
   query('favorite')
     .optional({ checkFalsy: true })

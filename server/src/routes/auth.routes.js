@@ -6,11 +6,12 @@ const {
   validateUpdateProfile, validateChangePassword, validateUpdatePreferences,
 } = require('../middleware/auth.validation');
 const { handleValidationErrors } = require('../middleware/validateRequest');
+const { createAuthRateLimiter } = require('../middleware/rateLimit');
 
 const router = Router();
 
-router.post('/register', validateRegister, handleValidationErrors, authController.register);
-router.post('/login', validateLogin, handleValidationErrors, authController.login);
+router.post('/register', createAuthRateLimiter(), validateRegister, handleValidationErrors, authController.register);
+router.post('/login', createAuthRateLimiter(), validateLogin, handleValidationErrors, authController.login);
 router.get('/me', requireAuth, authController.me);
 router.put('/me', requireAuth, validateUpdateProfile, handleValidationErrors, authController.updateProfile);
 router.put('/me/password', requireAuth, validateChangePassword, handleValidationErrors, authController.changePassword);
@@ -23,6 +24,6 @@ router.put(
   authController.updatePreferences
 );
 router.get('/google/config', authController.googleConfig);
-router.post('/google', validateGoogleAuth, handleValidationErrors, authController.googleAuth);
+router.post('/google', createAuthRateLimiter(), validateGoogleAuth, handleValidationErrors, authController.googleAuth);
 
 module.exports = router;

@@ -189,7 +189,7 @@ const recipeServices = {
     const cookbookIds = await getAccessibleCookbookIds(userId);
     const where = {
       [Op.or]: [
-        { createdById: userId },
+        { createdById: userId, cookbookId: null },
         ...(cookbookIds.length ? [{ cookbookId: cookbookIds }] : []),
       ],
     };

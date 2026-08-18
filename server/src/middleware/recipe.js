@@ -1,6 +1,6 @@
 const { Recipe } = require('../models');
 const cookbookServices = require('../services/cookbook.services');
-const { ROLE_RANK } = require('./cookbook');
+const { hasSufficientRole } = require('./cookbook');
 
 function requireRecipeAccess(minRole) {
   return async (req, res, next) => {
@@ -19,7 +19,7 @@ function requireRecipeAccess(minRole) {
       }
 
       const membership = await cookbookServices.getMembership(recipe.cookbookId, req.user.userId);
-      if (!membership || ROLE_RANK[membership.role] < ROLE_RANK[minRole]) {
+      if (!hasSufficientRole(membership, minRole)) {
         return res.status(403).json({ message: 'Rôle insuffisant pour cette action.' });
       }
 
@@ -38,7 +38,7 @@ async function requireCookbookEditorForCreate(req, res, next) {
     if (!cookbookId) return next();
 
     const membership = await cookbookServices.getMembership(cookbookId, req.user.userId);
-    if (!membership || ROLE_RANK[membership.role] < ROLE_RANK.EDITOR) {
+    if (!hasSufficientRole(membership, 'EDITOR')) {
       return res.status(403).json({ message: 'Rôle insuffisant pour créer une recette dans ce cookbook.' });
     }
     req.cookbookMembership = membership;
@@ -64,7 +64,7 @@ async function requireRecipeCookbookChangeAllowed(req, res, next) {
 
     if (newCookbookId) {
       const membership = await cookbookServices.getMembership(newCookbookId, req.user.userId);
-      if (!membership || ROLE_RANK[membership.role] < ROLE_RANK.EDITOR) {
+      if (!hasSufficientRole(membership, 'EDITOR')) {
         return res.status(403).json({ message: 'Rôle insuffisant dans le cookbook cible.' });
       }
     }

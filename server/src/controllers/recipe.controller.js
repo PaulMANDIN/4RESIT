@@ -1,3 +1,4 @@
+const fs = require('fs');
 const recipeServices = require('../services/recipe.services');
 
 async function create(req, res) {
@@ -116,10 +117,12 @@ async function uploadImage(req, res) {
     const imageUrl = `/uploads/${req.file.filename}`;
     const recipe = await recipeServices.updateRecipeImage(req.params.id, imageUrl);
     if (!recipe) {
+      await fs.promises.unlink(req.file.path).catch(() => {});
       return res.status(404).json({ message: 'Recette non trouvée.' });
     }
     res.json({ imageUrl });
   } catch (err) {
+    if (req.file) await fs.promises.unlink(req.file.path).catch(() => {});
     res.status(500).json({ message: err.message });
   }
 }

@@ -1,6 +1,6 @@
 const { Server } = require('socket.io');
 const jwt = require('jsonwebtoken');
-const { ROLE_RANK } = require('../middleware/cookbook');
+const { hasSufficientRole } = require('../middleware/cookbook');
 const cookbookServices = require('../services/cookbook.services');
 const messageServices = require('../services/message.services');
 
@@ -49,7 +49,7 @@ module.exports = (httpServer) => {
         }
 
         const membership = await cookbookServices.getMembership(cookbookId, socket.user.userId);
-        if (!membership || ROLE_RANK[membership.role] < ROLE_RANK.COMMENTER) {
+        if (!hasSufficientRole(membership, 'COMMENTER')) {
           return callback?.({ error: 'Rôle insuffisant pour envoyer un message.' });
         }
 

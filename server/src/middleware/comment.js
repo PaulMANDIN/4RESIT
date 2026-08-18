@@ -1,6 +1,6 @@
 const { Recipe } = require('../models');
 const cookbookServices = require('../services/cookbook.services');
-const { ROLE_RANK } = require('./cookbook');
+const { hasSufficientRole } = require('./cookbook');
 
 function requireCommentAccess(minRole) {
   return async (req, res, next) => {
@@ -14,7 +14,7 @@ function requireCommentAccess(minRole) {
       }
 
       const membership = await cookbookServices.getMembership(recipe.cookbookId, req.user.userId);
-      if (!membership || ROLE_RANK[membership.role] < ROLE_RANK[minRole]) {
+      if (!hasSufficientRole(membership, minRole)) {
         return res.status(403).json({ message: 'Rôle insuffisant pour cette action.' });
       }
 

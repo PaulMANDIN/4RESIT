@@ -5,6 +5,8 @@ const authServices = require('../services/auth.services');
 
 const googleClient = process.env.GOOGLE_CLIENT_ID ? new OAuth2Client(process.env.GOOGLE_CLIENT_ID) : null;
 
+const DUMMY_PASSWORD_HASH = bcrypt.hashSync('supmeal-dummy-password', 10);
+
 function signToken(user) {
   return jwt.sign(
     { userId: user.id, email: user.email, name: user.name, avatar: user.avatar },
@@ -41,8 +43,8 @@ async function login(req, res) {
     const { email, password } = req.body;
 
     const user = await authServices.getUserByEmail(email);
-    const valid = user?.passwordHash && (await bcrypt.compare(password, user.passwordHash));
-    if (!valid) {
+    const valid = await bcrypt.compare(password, user?.passwordHash || DUMMY_PASSWORD_HASH);
+    if (!user || !user.passwordHash || !valid) {
       return res.status(401).json({ message: 'Identifiants invalides.' });
     }
 

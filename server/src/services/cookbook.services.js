@@ -1,4 +1,5 @@
 const { Cookbook, CookbookMember, User } = require('../models');
+const sequelize = require('../config/database');
 
 const cookbookServices = {
   createCookbook({ name, description, createdById }) {
@@ -11,10 +12,6 @@ const cookbookServices = {
 
   getMembership(cookbookId, userId) {
     return CookbookMember.findOne({ where: { cookbookId, userId } });
-  },
-
-  countCreators(cookbookId) {
-    return CookbookMember.count({ where: { cookbookId, role: 'CREATOR' } });
   },
 
   async getCookbooksForUser(userId) {
@@ -56,6 +53,48 @@ const cookbookServices = {
 
   removeMember(cookbookId, userId) {
     return CookbookMember.destroy({ where: { cookbookId, userId } });
+  },
+
+  // Verrouille les membres CREATOR du cookbook (SELECT ... FOR UPDATE) pour empêcher
+  // que deux démotions/suppressions concurrentes des deux derniers CREATOR passent
+  // toutes les deux le contrôle "il doit rester au moins un créateur".
+  async updateMemberRoleGuarded(cookbookId, userId, role) {
+    return sequelize.transaction(async (t) => {
+      const target = await CookbookMember.findOne({ where: { cookbookId, userId }, transaction: t });
+      if (!target) return { error: 'NOT_FOUND' };
+
+      if (target.role === 'CREATOR' && role !== 'CREATOR') {
+        const creators = await CookbookMember.findAll({
+          where: { cookbookId, role: 'CREATOR' },
+          transaction: t,
+          lock: t.LOCK.UPDATE,
+        });
+        if (creators.length <= 1) return { error: 'LAST_CREATOR' };
+      }
+
+      await CookbookMember.update({ role }, { where: { cookbookId, userId }, transaction: t });
+      const member = await CookbookMember.findOne({ where: { cookbookId, userId }, transaction: t });
+      return { member };
+    });
+  },
+
+  async removeMemberGuarded(cookbookId, userId) {
+    return sequelize.transaction(async (t) => {
+      const target = await CookbookMember.findOne({ where: { cookbookId, userId }, transaction: t });
+      if (!target) return { error: 'NOT_FOUND' };
+
+      if (target.role === 'CREATOR') {
+        const creators = await CookbookMember.findAll({
+          where: { cookbookId, role: 'CREATOR' },
+          transaction: t,
+          lock: t.LOCK.UPDATE,
+        });
+        if (creators.length <= 1) return { error: 'LAST_CREATOR' };
+      }
+
+      await CookbookMember.destroy({ where: { cookbookId, userId }, transaction: t });
+      return { removed: true };
+    });
   },
 
   findUserByEmail(email) {

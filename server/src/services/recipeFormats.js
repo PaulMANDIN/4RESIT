@@ -303,4 +303,76 @@ const formats = {
   mealie: { serialize: serializeMealie, parse: parseMealie },
 };
 
-module.exports = { formats, toPortableRecipe };
+const MAX_RECIPES_PER_IMPORT = 500;
+const MAX_COOKBOOKS_PER_IMPORT = 50;
+
+function validateImportedRecipe(r, context) {
+  if (typeof r.title !== 'string' || r.title.trim().length === 0 || r.title.length > 150) {
+    throw new Error(`Fichier invalide : titre de recette invalide dans ${context}.`);
+  }
+  if (r.description !== null && (typeof r.description !== 'string' || r.description.length > 5000)) {
+    throw new Error(`Fichier invalide : description trop longue dans ${context} ("${r.title}").`);
+  }
+  if (r.prepTime !== null && (!Number.isInteger(r.prepTime) || r.prepTime < 0)) {
+    throw new Error(`Fichier invalide : temps de préparation invalide dans ${context} ("${r.title}").`);
+  }
+  if (r.cookTime !== null && (!Number.isInteger(r.cookTime) || r.cookTime < 0)) {
+    throw new Error(`Fichier invalide : temps de cuisson invalide dans ${context} ("${r.title}").`);
+  }
+  if (r.portions !== null && (!Number.isInteger(r.portions) || r.portions < 1)) {
+    throw new Error(`Fichier invalide : nombre de portions invalide dans ${context} ("${r.title}").`);
+  }
+  if (r.source !== null && (typeof r.source !== 'string' || r.source.length > 255)) {
+    throw new Error(`Fichier invalide : source invalide dans ${context} ("${r.title}").`);
+  }
+  if (r.imageUrl !== null && (typeof r.imageUrl !== 'string' || r.imageUrl.length > 255)) {
+    throw new Error(`Fichier invalide : URL d'image invalide dans ${context} ("${r.title}").`);
+  }
+  r.ingredients.forEach((i) => {
+    if (typeof i.name !== 'string' || i.name.trim().length === 0) {
+      throw new Error(`Fichier invalide : ingrédient sans nom dans ${context} ("${r.title}").`);
+    }
+    if (i.quantity !== null && (typeof i.quantity !== 'number' || Number.isNaN(i.quantity) || i.quantity < 0)) {
+      throw new Error(`Fichier invalide : quantité d'ingrédient invalide dans ${context} ("${r.title}").`);
+    }
+    if (i.unit !== null && (typeof i.unit !== 'string' || i.unit.length > 50)) {
+      throw new Error(`Fichier invalide : unité d'ingrédient invalide dans ${context} ("${r.title}").`);
+    }
+  });
+  r.steps.forEach((s) => {
+    if (typeof s.description !== 'string' || s.description.trim().length === 0) {
+      throw new Error(`Fichier invalide : étape sans description dans ${context} ("${r.title}").`);
+    }
+  });
+  r.tags.forEach((t) => {
+    if (typeof t !== 'string' || t.trim().length === 0) {
+      throw new Error(`Fichier invalide : tag vide dans ${context} ("${r.title}").`);
+    }
+  });
+}
+
+function validateImportData(data) {
+  const totalRecipes = data.personalRecipes.length
+    + data.cookbooks.reduce((sum, cb) => sum + cb.recipes.length, 0);
+  if (totalRecipes > MAX_RECIPES_PER_IMPORT) {
+    throw new Error(`Fichier invalide : trop de recettes (max ${MAX_RECIPES_PER_IMPORT}).`);
+  }
+  if (data.cookbooks.length > MAX_COOKBOOKS_PER_IMPORT) {
+    throw new Error(`Fichier invalide : trop de cookbooks (max ${MAX_COOKBOOKS_PER_IMPORT}).`);
+  }
+
+  data.personalRecipes.forEach((r) => validateImportedRecipe(r, 'personalRecipes'));
+  data.cookbooks.forEach((cb) => {
+    if (typeof cb.name !== 'string' || cb.name.trim().length === 0 || cb.name.length > 100) {
+      throw new Error('Fichier invalide : nom de cookbook invalide.');
+    }
+    if (cb.description !== null && (typeof cb.description !== 'string' || cb.description.length > 2000)) {
+      throw new Error(`Fichier invalide : description de cookbook invalide ("${cb.name}").`);
+    }
+    cb.recipes.forEach((r) => validateImportedRecipe(r, `cookbook "${cb.name}"`));
+  });
+
+  return data;
+}
+
+module.exports = { formats, toPortableRecipe, validateImportData };

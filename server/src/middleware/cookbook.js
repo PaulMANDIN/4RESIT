@@ -2,6 +2,10 @@ const cookbookServices = require('../services/cookbook.services');
 
 const ROLE_RANK = { READER: 1, COMMENTER: 2, EDITOR: 3, CREATOR: 4 };
 
+function hasSufficientRole(membership, minRole) {
+  return Boolean(membership) && ROLE_RANK[membership.role] >= ROLE_RANK[minRole];
+}
+
 function requireCookbookRole(minRole) {
   return async (req, res, next) => {
     try {
@@ -9,7 +13,7 @@ function requireCookbookRole(minRole) {
       if (!membership) {
         return res.status(403).json({ message: "Vous n'êtes pas membre de ce cookbook." });
       }
-      if (ROLE_RANK[membership.role] < ROLE_RANK[minRole]) {
+      if (!hasSufficientRole(membership, minRole)) {
         return res.status(403).json({ message: 'Rôle insuffisant pour cette action.' });
       }
       req.cookbookMembership = membership;
@@ -20,4 +24,4 @@ function requireCookbookRole(minRole) {
   };
 }
 
-module.exports = { requireCookbookRole, ROLE_RANK };
+module.exports = { requireCookbookRole, ROLE_RANK, hasSufficientRole };

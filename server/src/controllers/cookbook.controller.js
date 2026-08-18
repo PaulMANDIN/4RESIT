@@ -92,19 +92,14 @@ async function updateMemberRole(req, res) {
     const { role } = req.body;
     const { id: cookbookId, userId: targetUserId } = req.params;
 
-    const target = await cookbookServices.getMembership(cookbookId, targetUserId);
-    if (!target) {
+    const { error, member } = await cookbookServices.updateMemberRoleGuarded(cookbookId, targetUserId, role);
+    if (error === 'NOT_FOUND') {
       return res.status(404).json({ message: 'Membre non trouvé.' });
     }
-
-    if (target.role === 'CREATOR' && role !== 'CREATOR') {
-      const remainingCreators = await cookbookServices.countCreators(cookbookId);
-      if (remainingCreators <= 1) {
-        return res.status(400).json({ message: 'Il doit rester au moins un créateur pour ce cookbook.' });
-      }
+    if (error === 'LAST_CREATOR') {
+      return res.status(400).json({ message: 'Il doit rester au moins un créateur pour ce cookbook.' });
     }
 
-    const member = await cookbookServices.updateMemberRole(cookbookId, targetUserId, role);
     res.json({ member });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -115,19 +110,14 @@ async function removeMember(req, res) {
   try {
     const { id: cookbookId, userId: targetUserId } = req.params;
 
-    const target = await cookbookServices.getMembership(cookbookId, targetUserId);
-    if (!target) {
+    const { error } = await cookbookServices.removeMemberGuarded(cookbookId, targetUserId);
+    if (error === 'NOT_FOUND') {
       return res.status(404).json({ message: 'Membre non trouvé.' });
     }
-
-    if (target.role === 'CREATOR') {
-      const remainingCreators = await cookbookServices.countCreators(cookbookId);
-      if (remainingCreators <= 1) {
-        return res.status(400).json({ message: 'Il doit rester au moins un créateur pour ce cookbook.' });
-      }
+    if (error === 'LAST_CREATOR') {
+      return res.status(400).json({ message: 'Il doit rester au moins un créateur pour ce cookbook.' });
     }
 
-    await cookbookServices.removeMember(cookbookId, targetUserId);
     res.status(204).send();
   } catch (err) {
     res.status(500).json({ message: err.message });
